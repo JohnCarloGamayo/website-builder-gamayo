@@ -6,8 +6,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
   Undo2, Redo2, Save, Download, Upload, Eye, 
-  Grid3X3, ZoomIn, ZoomOut, RotateCcw, Home, Check, Magnet, Monitor, Tablet, Smartphone
+  Grid3X3, ZoomIn, ZoomOut, RotateCcw, Home, Check, Magnet, Monitor, Tablet, Smartphone, Code, FileJson
 } from 'lucide-react';
+import { generateHTMLExport, generateReactExport } from '@/lib/export';
 
 export default function EditorHeader() {
   const router = useRouter();
@@ -20,6 +21,7 @@ export default function EditorHeader() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saved, setSaved] = useState(false);
   const [previewMode, setPreviewMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   const handleExport = () => {
     const data = exportDesign();
@@ -30,6 +32,33 @@ export default function EditorHeader() {
     a.download = 'website-design.json';
     a.click();
     URL.revokeObjectURL(url);
+    setShowExportMenu(false);
+  };
+
+  const handleExportHTML = () => {
+    const state = useEditorStore.getState();
+    const html = generateHTMLExport(state.pages, state.canvasWidth);
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'index.html';
+    a.click();
+    URL.revokeObjectURL(url);
+    setShowExportMenu(false);
+  };
+
+  const handleExportReact = () => {
+    const state = useEditorStore.getState();
+    const react = generateReactExport(state.pages, state.canvasWidth);
+    const blob = new Blob([react], { type: 'text/javascript' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'App.jsx';
+    a.click();
+    URL.revokeObjectURL(url);
+    setShowExportMenu(false);
   };
 
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,13 +238,41 @@ export default function EditorHeader() {
           <span className="hidden sm:inline">Import</span>
         </button>
 
-        <button
-          onClick={handleExport}
-          className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-sm"
-        >
-          <Download size={16} />
-          <span className="hidden sm:inline">Export</span>
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setShowExportMenu(!showExportMenu)}
+            className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg transition-colors text-sm"
+          >
+            <Download size={16} />
+            <span className="hidden sm:inline">Export</span>
+          </button>
+
+          {showExportMenu && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)} />
+              <div className="absolute right-0 mt-2 w-48 bg-[#1e1e2e] border border-gray-700 rounded-lg shadow-2xl py-1 z-50">
+                <button
+                  onClick={handleExport}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800 flex items-center gap-2"
+                >
+                  <FileJson size={14} /> Export JSON
+                </button>
+                <button
+                  onClick={handleExportHTML}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800 flex items-center gap-2"
+                >
+                  <Code size={14} /> Export HTML
+                </button>
+                <button
+                  onClick={handleExportReact}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800 flex items-center gap-2"
+                >
+                  <Code size={14} /> Export React
+                </button>
+              </div>
+            </>
+          )}
+        </div>
 
         <button
           onClick={handleSave}

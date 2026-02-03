@@ -5,6 +5,7 @@ import LayersPanel from '@/components/builder/LayersPanel'; // Acts as LeftSideb
 import EditorCanvas from '@/components/builder/EditorCanvas';
 import PropertiesPanel from '@/components/builder/PropertiesPanel';
 import FloatingToolbar from '@/components/builder/FloatingToolbar'; // New
+import AutoSave from '@/components/builder/AutoSave';
 import { useEditorStore } from '@/store/editorStore';
 import { Button } from '@/components/ui/button';
 import { Trash2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
@@ -17,6 +18,7 @@ export default function EditorPage() {
 
   return (
     <div className="h-screen flex flex-col bg-[#1e1e1e] overflow-hidden text-gray-300">
+      <AutoSave />
       <TemplateModal />
       {/* Top Header */}
       <EditorHeader />
