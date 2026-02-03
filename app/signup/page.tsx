@@ -3,23 +3,22 @@ import Link from 'next/link'
 import { signup } from './actions'
 import React from 'react'
 import { useToast } from "@/components/ui/use-toast"
+import { useSearchParams } from 'next/navigation'
 
-export default function Signup({
-  searchParams,
-}: {
-  searchParams: { message: string }
-}) {
+export default function Signup() {
   const { toast } = useToast()
+  const searchParams = useSearchParams()
+  const message = searchParams.get('message')
 
   React.useEffect(() => {
-    if (searchParams?.message) {
+    if (message) {
       toast({
         variant: "destructive",
         title: "Signup Error",
-        description: searchParams.message,
+        description: message,
       })
     }
-  }, [searchParams, toast])
+  }, [message, toast])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0d0d1a] text-white p-4">
@@ -63,9 +62,9 @@ export default function Signup({
             </div>
           </div>
 
-          {searchParams?.message && (
+          {message && (
             <div className="p-3 bg-red-900/50 border border-red-500/50 rounded text-sm text-red-200 text-center">
-              {searchParams.message}
+              {message}
             </div>
           )}
 
