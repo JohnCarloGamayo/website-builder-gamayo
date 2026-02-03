@@ -1,11 +1,11 @@
 'use client';
 import Link from 'next/link'
 import { signup } from './actions'
-import React from 'react'
+import React, { Suspense } from 'react'
 import { useToast } from "@/components/ui/use-toast"
 import { useSearchParams } from 'next/navigation'
 
-export default function Signup() {
+function SignupForm() {
   const { toast } = useToast()
   const searchParams = useSearchParams()
   const message = searchParams.get('message')
@@ -86,5 +86,17 @@ export default function Signup() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function Signup() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#0d0d1a] text-white">
+        <div className="text-gray-400">Loading...</div>
+      </div>
+    }>
+      <SignupForm />
+    </Suspense>
   )
 }
