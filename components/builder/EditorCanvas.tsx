@@ -140,18 +140,8 @@ export default function EditorCanvas() {
              // Render children inside
              if (isGroup) {
                  content = (
-                    <>
-                        {children.map((child, idx) => {
-                            // Recursively render children
-                            // We use a regular div instead of Rnd for grouped items to keep them relative? 
-                            // Or we use absolute positioning inside this relative container.
-                            // Since Rnd uses absolute/fixed, nesting Rnd is perfectly fine as long as parent has no transform issues.
-                            // Rnd positions are absolute. If we nest Rnd inside Rnd, child x/y is relative to parent options.
-                            // We need to map child rendering here.
-                            
-                            // Important: children are not Top Level in the Rnd loop, so we filter them there.
-                            // But here we need to render them with local coordinates.
-                            
+                    <div style={{ position: 'relative', width: '100%', height: '100%', pointerEvents: 'none' }}>
+                        {children.map((child) => {
                             return (
                                 <div 
                                     key={child.id}
@@ -161,19 +151,15 @@ export default function EditorCanvas() {
                                         top: child.styles.y,
                                         width: child.styles.width,
                                         height: child.styles.height,
-                                        zIndex: child.styles.zIndex,
+                                        zIndex: child.styles.zIndex || 0,
+                                        pointerEvents: 'auto',
                                     }}
                                 >
-                                   {/* We reuse rendering logic but without the wrapper Rnd for drag/drop, OR we allow nested drag?
-                                       For now, let's just render the visual representation. 
-                                       If we want full nested editing, we need Rnd here too. 
-                                       But selecting a child inside a group usually selects the group first. 
-                                       Let's render a static preview of children. */}
                                    {renderComponentContent(child)} 
                                 </div>
                             );
                         })}
-                    </>
+                    </div>
                  );
              }
              break;
