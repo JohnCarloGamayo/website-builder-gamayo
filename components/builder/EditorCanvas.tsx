@@ -8,7 +8,7 @@ export default function EditorCanvas() {
   const { 
     components, selectedId, selectedIds, hoveredId, zoom, showGrid, canvasWidth, canvasHeight,
     selectComponent, hoverComponent, moveComponent, resizeComponent, saveHistory, setCanvasSize,
-    groupSelected, ungroupSelected
+    groupSelected, ungroupSelected, duplicateComponent, removeComponent
   } = useEditorStore();
   
   const canvasRef = useRef<HTMLDivElement>(null);
