@@ -65,7 +65,7 @@ export default function Hero() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up mb-16" style={{ animationDelay: '0.3s' }}>
-          <Link href="/editor"
+          <Link href="/signup"
             className="group px-8 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-[length:200%_200%] animate-gradient-x hover:brightness-110 text-white font-semibold rounded-full transition-all transform hover:scale-105 hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] w-full sm:w-auto flex items-center justify-center gap-2"
           >
             Start Building Free

@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowRight, Sparkles } from 'lucide-react';
+import Link from 'next/link';
 
 export default function CTA() {
   return (
@@ -24,13 +25,13 @@ export default function CTA() {
             Join hundreds of organizations using AI to automate workflows, enhance productivity, and make smarter decisions. Start your free trial today—no credit card required.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button 
-              onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+            <Link 
+              href="/signup"
               className="group px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition duration-300 flex items-center gap-2 hover:shadow-2xl hover:shadow-purple-500/50 transform hover:scale-105"
             >
               Start Free Trial
               <ArrowRight size={20} className="group-hover:translate-x-1 transition duration-300" />
-            </button>
+            </Link>
             <button 
               onClick={() => window.location.href = '#contact'}
               className="px-8 py-4 border-2 border-purple-500/50 hover:border-pink-500 text-white font-semibold rounded-xl transition duration-300 hover:bg-purple-900/30 backdrop-blur-sm"

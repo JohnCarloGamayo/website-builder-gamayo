@@ -1,11 +1,26 @@
+'use client';
 import Link from 'next/link'
 import { login } from './actions'
+import React, { useEffect } from 'react'
+import { useToast } from "@/components/ui/use-toast"
 
 export default function Login({
   searchParams,
 }: {
   searchParams: { message: string }
 }) {
+  const { toast } = useToast()
+
+  React.useEffect(() => {
+    if (searchParams?.message) {
+      toast({
+        variant: "destructive",
+        title: "Login Error",
+        description: searchParams.message,
+      })
+    }
+  }, [searchParams, toast])
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0d0d1a] text-white p-4">
       <div className="w-full max-w-md space-y-8 bg-[#1e1e2e] p-8 rounded-xl border border-gray-800 shadow-2xl">

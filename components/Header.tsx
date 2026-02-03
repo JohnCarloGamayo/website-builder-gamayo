@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import Image from 'next/image';
@@ -50,12 +51,20 @@ export default function Header() {
         {/* Right Section */}
         <div className="flex items-center gap-4">
           {/* Login Button - Desktop */}
-          <button 
-            onClick={() => window.location.href = '#login'}
+          <Link 
+            href="/login"
+            className="hidden md:block text-gray-300 hover:text-white font-medium transition duration-300"
+          >
+            Log in
+          </Link>
+          
+          {/* Signup Button - Desktop */}
+          <Link 
+            href="/signup"
             className="hidden md:block px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition duration-300 hover:shadow-lg hover:shadow-purple-500/50 transform hover:scale-105"
           >
-            Login
-          </button>
+            Sign up
+          </Link>
 
           {/* Mobile Menu Button */}
           <button 
@@ -83,12 +92,20 @@ export default function Header() {
             <button onClick={() => scrollToSection('faq')} className="text-gray-400 hover:text-white transition py-2 duration-300 text-left">
               FAQ
             </button>
-            <button 
-              onClick={() => window.location.href = '#login'}
-              className="w-full px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition duration-300 mt-4"
-            >
-              Login
-            </button>
+            <div className="flex flex-col gap-3 mt-4">
+              <Link 
+                href="/login"
+                className="w-full text-center py-2 text-gray-300 hover:text-white font-medium transition duration-300 border border-gray-700 rounded-lg"
+              >
+                Log in
+              </Link>
+              <Link 
+                href="/signup"
+                className="w-full text-center px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition duration-300"
+              >
+                Sign up
+              </Link>
+            </div>
           </nav>
         </div>
       )}
