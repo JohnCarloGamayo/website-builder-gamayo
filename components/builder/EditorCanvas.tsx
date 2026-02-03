@@ -9,7 +9,8 @@ export default function EditorCanvas() {
   const { 
     components, selectedId, selectedIds, hoveredId, zoom, showGrid, snapToGrid, canvasWidth, canvasHeight,
     selectComponent, hoverComponent, moveComponent, resizeComponent, saveHistory, setCanvasSize,
-    groupSelected, ungroupSelected, duplicateComponent, removeComponent, selectAllComponents, setZoom
+    groupSelected, ungroupSelected, duplicateComponent, removeComponent, selectAllComponents, setZoom,
+    baseCanvasWidth, previewMode
   } = useEditorStore();
   
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -145,6 +146,29 @@ export default function EditorCanvas() {
     return snapToGrid ? Math.round(value / gridSize) * gridSize : value;
   };
 
+  // Responsive scaling factor
+  const scaleFactor = canvasWidth / (baseCanvasWidth || 1440);
+  
+  // Apply scale to component dimensions for responsive preview
+  const getScaledValue = (value: number) => {
+    if (previewMode === 'desktop') return value;
+    return Math.round(value * scaleFactor);
+  };
+
+  // Scale height proportionally (maintains aspect ratio better)
+  const getScaledHeight = (value: number) => {
+    if (previewMode === 'desktop') return value;
+    // Scale height but with a minimum to prevent components from becoming too small
+    return Math.max(Math.round(value * scaleFactor), Math.round(value * 0.5));
+  };
+
+  // Scale font size for responsive
+  const getScaledFontSize = (value: number | undefined) => {
+    if (!value) return value;
+    if (previewMode === 'desktop') return value;
+    return Math.max(Math.round(value * scaleFactor), Math.round(value * 0.6));
+  };
+
   const startResizeCanvas = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -182,24 +206,29 @@ export default function EditorCanvas() {
     // Use components array order for zIndex (Higher index = Front)
     const calculatedZIndex = index + (comp.styles.zIndex || 0);
 
+    // Scale font size and other values for responsive preview
+    const scaledFontSize = getScaledFontSize(comp.styles.fontSize);
+    const scaledPadding = comp.styles.padding ? getScaledValue(comp.styles.padding) : undefined;
+    const scaledBorderRadius = comp.styles.borderRadius ? Math.max(getScaledValue(comp.styles.borderRadius), 2) : undefined;
+
     // Base Styles
     const style: React.CSSProperties = {
       width: '100%',
       height: '100%',
       backgroundColor: comp.styles.backgroundColor,
       color: comp.styles.textColor,
-      fontSize: comp.styles.fontSize,
+      fontSize: scaledFontSize,
       fontWeight: comp.styles.fontWeight,
       fontFamily: comp.styles.fontFamily,
       fontStyle: comp.styles.fontStyle,
       textDecoration: comp.styles.textDecoration,
-      borderRadius: comp.styles.borderRadius,
+      borderRadius: scaledBorderRadius,
       opacity: comp.styles.opacity,
       textAlign: comp.styles.textAlign,
       lineHeight: comp.styles.lineHeight,
-      padding: comp.styles.padding,
-      borderStyle: comp.styles.borderStyle || 'solid',
-      borderWidth: comp.styles.borderWidth,
+      padding: scaledPadding,
+      borderStyle: comp.styles.borderWidth ? (comp.styles.borderStyle || 'solid') : 'none',
+      borderWidth: comp.styles.borderWidth || 0,
       borderColor: comp.styles.borderColor || 'transparent',
       boxShadow: comp.styles.boxShadow,
       overflow: 'hidden',
@@ -279,14 +308,11 @@ export default function EditorCanvas() {
     }
 
     if (comp.type === 'divider') {
-        // ... (Similar logic, simplified for brevity in this edit if needed, but keeping full for correctness)
-        // For brevity, skipping full rewrite of divider logic inside this switch, assuming standard return below handles generic + special 'divider' if not returned early.
-        // Actually, existing code returned early for divider.
          return (
              <Rnd
                 key={comp.id}
-                position={{ x: comp.styles.x, y: comp.styles.y }}
-                size={{ width: comp.styles.width, height: comp.styles.height }}
+                position={{ x: getScaledValue(comp.styles.x), y: comp.styles.y }}
+                size={{ width: getScaledValue(comp.styles.width), height: getScaledHeight(comp.styles.height) }}
                 scale={zoom / 100}
                 onMouseDown={(e) => { 
                   e.stopPropagation();
@@ -296,10 +322,28 @@ export default function EditorCanvas() {
                       selectComponent(comp.id); 
                   }
                 }}
-                onDrag={(e, d) => { moveComponent(comp.id, d.x, d.y); }}
-                onDragStop={(e, d) => { moveComponent(comp.id, d.x, d.y); saveHistory(); }}
-                onResize={(e, direction, ref, delta, position) => { resizeComponent(comp.id, parseInt(ref.style.width), parseInt(ref.style.height)); moveComponent(comp.id, position.x, position.y); }}
-                onResizeStop={(e, direction, ref, delta, position) => { resizeComponent(comp.id, parseInt(ref.style.width), parseInt(ref.style.height)); moveComponent(comp.id, position.x, position.y); saveHistory(); }}
+                onDrag={(e, d) => { 
+                  const baseX = previewMode === 'desktop' ? d.x : Math.round(d.x / scaleFactor);
+                  moveComponent(comp.id, baseX, d.y); 
+                }}
+                onDragStop={(e, d) => { 
+                  const baseX = previewMode === 'desktop' ? d.x : Math.round(d.x / scaleFactor);
+                  moveComponent(comp.id, baseX, d.y); 
+                  saveHistory(); 
+                }}
+                onResize={(e, direction, ref, delta, position) => { 
+                  const baseWidth = previewMode === 'desktop' ? parseInt(ref.style.width) : Math.round(parseInt(ref.style.width) / scaleFactor);
+                  const baseX = previewMode === 'desktop' ? position.x : Math.round(position.x / scaleFactor);
+                  resizeComponent(comp.id, baseWidth, parseInt(ref.style.height)); 
+                  moveComponent(comp.id, baseX, position.y); 
+                }}
+                onResizeStop={(e, direction, ref, delta, position) => { 
+                  const baseWidth = previewMode === 'desktop' ? parseInt(ref.style.width) : Math.round(parseInt(ref.style.width) / scaleFactor);
+                  const baseX = previewMode === 'desktop' ? position.x : Math.round(position.x / scaleFactor);
+                  resizeComponent(comp.id, baseWidth, parseInt(ref.style.height)); 
+                  moveComponent(comp.id, baseX, position.y); 
+                  saveHistory(); 
+                }}
                 onClick={(e: React.MouseEvent) => { e.stopPropagation(); }}
                 onMouseEnter={() => hoverComponent(comp.id)}
                 onMouseLeave={() => hoverComponent(null)}
@@ -317,8 +361,8 @@ export default function EditorCanvas() {
     return (
       <Rnd
         key={comp.id}
-        position={{ x: comp.styles.x, y: comp.styles.y }}
-        size={{ width: comp.styles.width, height: comp.styles.height }}
+        position={{ x: getScaledValue(comp.styles.x), y: comp.styles.y }}
+        size={{ width: getScaledValue(comp.styles.width), height: getScaledHeight(comp.styles.height) }}
         scale={zoom / 100}
         onMouseDown={(e) => { 
           // Select only if not already selected to minimize re-renders during interaction start
@@ -330,23 +374,30 @@ export default function EditorCanvas() {
           }
         }}
         onDrag={(e, d) => {
-          const snappedX = snapToGridValue(d.x);
+          // Convert back to base canvas coordinates when dragging
+          const baseX = previewMode === 'desktop' ? d.x : Math.round(d.x / scaleFactor);
+          const snappedX = snapToGridValue(baseX);
           const snappedY = snapToGridValue(d.y);
           moveComponent(comp.id, snappedX, snappedY);
         }}
         onDragStop={(e, d) => {
-          const snappedX = snapToGridValue(d.x);
+          const baseX = previewMode === 'desktop' ? d.x : Math.round(d.x / scaleFactor);
+          const snappedX = snapToGridValue(baseX);
           const snappedY = snapToGridValue(d.y);
           moveComponent(comp.id, snappedX, snappedY);
           saveHistory();
         }}
         onResize={(e, direction, ref, delta, position) => {
-          resizeComponent(comp.id, parseInt(ref.style.width), parseInt(ref.style.height));
-          moveComponent(comp.id, position.x, position.y);
+          const baseWidth = previewMode === 'desktop' ? parseInt(ref.style.width) : Math.round(parseInt(ref.style.width) / scaleFactor);
+          const baseX = previewMode === 'desktop' ? position.x : Math.round(position.x / scaleFactor);
+          resizeComponent(comp.id, baseWidth, parseInt(ref.style.height));
+          moveComponent(comp.id, baseX, position.y);
         }}
         onResizeStop={(e, direction, ref, delta, position) => {
-          resizeComponent(comp.id, parseInt(ref.style.width), parseInt(ref.style.height));
-          moveComponent(comp.id, position.x, position.y);
+          const baseWidth = previewMode === 'desktop' ? parseInt(ref.style.width) : Math.round(parseInt(ref.style.width) / scaleFactor);
+          const baseX = previewMode === 'desktop' ? position.x : Math.round(position.x / scaleFactor);
+          resizeComponent(comp.id, baseWidth, parseInt(ref.style.height));
+          moveComponent(comp.id, baseX, position.y);
           saveHistory();
         }}
         onClick={(e: React.MouseEvent) => {

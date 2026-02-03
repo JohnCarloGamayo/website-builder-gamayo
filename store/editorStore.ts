@@ -69,6 +69,8 @@ interface EditorState {
   snapToGrid: boolean;
   canvasWidth: number;
   canvasHeight: number;
+  baseCanvasWidth: number; // Original design width (1440px)
+  previewMode: 'desktop' | 'tablet' | 'mobile';
   history: ComponentData[][];
   historyIndex: number;
   
@@ -96,6 +98,8 @@ interface EditorState {
   
   setZoom: (zoom: number) => void;
   setCanvasSize: (width: number, height: number) => void;
+  setPreviewMode: (mode: 'desktop' | 'tablet' | 'mobile') => void;
+  getScaleFactor: () => number;
   toggleGrid: () => void;
   toggleSnapToGrid: () => void;
   
@@ -128,6 +132,8 @@ export const useEditorStore = create<EditorState>()(
       snapToGrid: false,
       canvasWidth: 1440, // Default to standard desktop
       canvasHeight: 1200,
+      baseCanvasWidth: 1440, // Original design width
+      previewMode: 'desktop',
       history: [defaultComponents],
       historyIndex: 0,
       
@@ -548,7 +554,20 @@ export const useEditorStore = create<EditorState>()(
           set({ canvasWidth: width, canvasHeight: height, pages: updatedPages });
       },
 
-      resetToDefault: () => set({ pages: defaultPages, currentPageId: 'home', components: [], history: [[]], historyIndex: 0 }),
+      setPreviewMode: (mode) => {
+          const widths = { desktop: 1440, tablet: 768, mobile: 375 };
+          const width = widths[mode];
+          const { pages, currentPageId } = get();
+          const updatedPages = pages.map(p => p.id === currentPageId ? { ...p, canvasHeight: get().canvasHeight } : p);
+          set({ previewMode: mode, canvasWidth: width, pages: updatedPages });
+      },
+
+      getScaleFactor: () => {
+          const { canvasWidth, baseCanvasWidth } = get();
+          return canvasWidth / baseCanvasWidth;
+      },
+
+      resetToDefault: () => set({ pages: defaultPages, currentPageId: 'home', components: [], history: [[]], historyIndex: 0, previewMode: 'desktop', canvasWidth: 1440 }),
     }),
     {
       name: 'website-builder',
@@ -558,7 +577,8 @@ export const useEditorStore = create<EditorState>()(
           currentPageId: state.currentPageId,
           components: state.components,
           canvasWidth: state.canvasWidth < 300 ? 1440 : state.canvasWidth, // Migration fix for bad widths
-          canvasHeight: state.canvasHeight 
+          canvasHeight: state.canvasHeight,
+          previewMode: state.previewMode || 'desktop'
       }),
     }
   )

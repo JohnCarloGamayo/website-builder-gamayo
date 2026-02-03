@@ -6,21 +6,20 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
   Undo2, Redo2, Save, Download, Upload, Eye, 
-  Grid3X3, ZoomIn, ZoomOut, RotateCcw, Home, Check, Magnet, Monitor, Tablet, Smartphone, Code, FileJson
+  Grid3X3, ZoomIn, ZoomOut, RotateCcw, Home, Check, Magnet, Monitor, Tablet, Smartphone, Code, FileJson, FileArchive
 } from 'lucide-react';
-import { generateHTMLExport, generateReactExport } from '@/lib/export';
+import { generateHTMLExport, generateReactExport, generateZipExport } from '@/lib/export';
 
 export default function EditorHeader() {
   const router = useRouter();
   const { 
     zoom, setZoom, showGrid, toggleGrid, snapToGrid, toggleSnapToGrid,
     undo, redo, exportDesign, importDesign, resetToDefault,
-    history, historyIndex, saveHistory, setCanvasSize
+    history, historyIndex, saveHistory, setPreviewMode, previewMode
   } = useEditorStore();
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saved, setSaved] = useState(false);
-  const [previewMode, setPreviewMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [showExportMenu, setShowExportMenu] = useState(false);
 
   const handleExport = () => {
@@ -61,6 +60,12 @@ export default function EditorHeader() {
     setShowExportMenu(false);
   };
 
+  const handleExportZip = async () => {
+    const state = useEditorStore.getState();
+    await generateZipExport(state.pages, state.canvasWidth);
+    setShowExportMenu(false);
+  };
+
   const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -88,8 +93,6 @@ export default function EditorHeader() {
 
   const handlePreviewMode = (mode: 'desktop' | 'tablet' | 'mobile') => {
     setPreviewMode(mode);
-    const widths = { desktop: 1440, tablet: 768, mobile: 375 };
-    setCanvasSize(widths[mode], 1200);
   };
 
   return (
@@ -251,6 +254,13 @@ export default function EditorHeader() {
             <>
               <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)} />
               <div className="absolute right-0 mt-2 w-48 bg-[#1e1e2e] border border-gray-700 rounded-lg shadow-2xl py-1 z-50">
+                <button
+                  onClick={handleExportZip}
+                  className="w-full px-4 py-2 text-left text-sm text-purple-400 hover:bg-gray-800 flex items-center gap-2 font-medium"
+                >
+                  <FileArchive size={14} /> Export ZIP Package
+                </button>
+                <div className="h-px bg-gray-700 my-1" />
                 <button
                   onClick={handleExport}
                   className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800 flex items-center gap-2"
