@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin, Layers } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -12,19 +12,13 @@ export default function Footer() {
           {/* About */}
           <div className="animate-fade-in-up">
             <div className="flex items-center gap-3 mb-4">
-              <div className="relative bg-white/10 backdrop-blur-sm rounded-xl p-2">
-                <Image 
-                  src="/images/logo.png" 
-                  alt="Logo" 
-                  width={32} 
-                  height={32}
-                  className="brightness-0 invert"
-                />
+              <div className="relative bg-white/10 backdrop-blur-sm rounded-xl p-2 text-white">
+                <Layers size={32} />
               </div>
-              <h3 className="text-white font-bold text-lg">AI Assistant</h3>
+              <h3 className="text-white font-bold text-lg">WebBuilder</h3>
             </div>
             <p className="text-gray-400 text-sm leading-relaxed hover:text-gray-300 transition duration-300">
-              Empowering organizations with AI-powered assistants that understand your business. Upload documents, train agents, and transform how your team works.
+              Empowering creators with intuitive tools to build the web. Design, customize, and launch your dream website in minutes without coding.
             </p>
           </div>
 
@@ -93,15 +87,15 @@ export default function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-gray-400 hover:text-white transition duration-300">
                 <Mail size={18} className="mt-1 flex-shrink-0 text-orange-500" />
-                <a href="mailto:support@aiassistant.com" className="text-sm">support@aiassistant.com</a>
+                <a href="mailto:support@webbuilder.com" className="text-sm">support@webbuilder.com</a>
               </li>
               <li className="flex items-start gap-3 text-gray-400 hover:text-white transition duration-300">
                 <Phone size={18} className="mt-1 flex-shrink-0 text-orange-500" />
-                <span className="text-sm">+1 (555) 123-4567</span>
+                <span className="text-sm">+1 (555) 987-6543</span>
               </li>
               <li className="flex items-start gap-3 text-gray-400 hover:text-white transition duration-300">
                 <MapPin size={18} className="mt-1 flex-shrink-0 text-orange-500" />
-                <span className="text-sm">123 AI Street, Tech City, TC 12345</span>
+                <span className="text-sm">123 Web St, Tech City, TC 12345</span>
               </li>
             </ul>
           </div>
@@ -109,7 +103,7 @@ export default function Footer() {
 
         {/* Bottom Border */}
         <div className="border-t border-gray-800 pt-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          <p className="text-gray-500 text-sm text-center">© 2026 AI Assistant. All rights reserved. Empowering organizations with intelligent automation.</p>
+          <p className="text-gray-500 text-sm text-center">© 2026 WebBuilder. All rights reserved. Empowering creators to build the future.</p>
         </div>
       </div>
     </footer>

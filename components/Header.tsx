@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Layers } from 'lucide-react';
 import Image from 'next/image';
 
 export default function Header() {
@@ -21,15 +21,10 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Logo */}
         <div className="flex items-center gap-3 group cursor-pointer">
-          <div className="relative bg-white/10 backdrop-blur-sm rounded-xl p-2 hover:bg-white/20 transition-all duration-300 group-hover:scale-110">
-            <Image 
-              src="/images/logo.png" 
-              alt="Logo" 
-              width={80} 
-              height={60}
-              className="brightness-0 invert"
-            />
+          <div className="relative bg-white/10 backdrop-blur-sm rounded-xl p-2 hover:bg-white/20 transition-all duration-300 group-hover:scale-110 text-white">
+            <Layers size={32} />
           </div>
+          <span className="text-xl font-bold text-white tracking-wide">WebBuilder</span>
         </div>
 
         {/* Navigation - Desktop */}

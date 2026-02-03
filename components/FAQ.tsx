@@ -8,29 +8,29 @@ export default function FAQ() {
 
   const faqs = [
     {
-      question: 'What is this AI Assistant platform?',
+      question: 'What is this Website Builder platform?',
       answer:
-        "It's an AI-powered SaaS platform that acts like ChatGPT but specifically trained on your organization's data. Upload documents, policies, and knowledge bases to create intelligent assistants for hiring, healthcare, employee records, and more.",
+        "It's a powerful, drag-and-drop website builder designed to help you create stunning, professional websites in minutes without writing a single line of code. Perfect for portfolios, business sites, and landing pages.",
     },
     {
-      question: 'How do I upload and train my AI agents?',
-      answer: 'Simply upload your documents (PDFs, Word files, spreadsheets) through our intuitive dashboard. Our AI processes and learns from your content, creating a knowledge base that agents can reference to provide accurate, context-aware responses.',
+      question: 'How do I start building my website?',
+      answer: 'Simply click "Start Building" to enter the editor. Drag and drop components onto the canvas, customize styles, and arrange your layout exactly how you want it. No design experience needed.',
     },
     {
-      question: 'What types of assistants can I create?',
-      answer: 'You can create specialized assistants for any department: Hiring Managers for recruitment, Healthcare Assistants for medical queries, Employee Records managers, Customer Support agents, HR assistants, and more. Each agent learns from your specific documents and workflows.',
+      question: 'Is it mobile-friendly?',
+      answer: 'Yes! All websites created with our builder are fully responsive by default. You can also switch to mobile view in the editor to fine-tune how your site looks on smaller screens.',
+    },
+    {
+      question: 'Can I export my code?',
+      answer: 'Absolutely. We believe you should own your work. You can export your design as clean, production-ready React/HTML code to host anywhere you like.',
+    },
+    {
+      question: 'Do I need programming skills?',
+      answer: 'Not at all. Our platform is built for everyone. Whether you\'re a complete beginner or a professional developer looking to speed up your workflow, our visual tools make the process seamless.',
     },
     {
       question: 'Is my data secure?',
-      answer: 'Absolutely! We use enterprise-grade encryption, role-based access control, and comply with industry standards like GDPR and HIPAA. Your documents and conversations are private and never used to train other models.',
-    },
-    {
-      question: 'What happens if I exceed my plan limits?',
-      answer: 'You can upgrade to a higher tier anytime to get more agents, storage, and tokens. Enterprise plans offer unlimited everything with dedicated support. No data is lost when upgrading.',
-    },
-    {
-      question: 'Can multiple team members use the same agents?',
-      answer: 'Yes! All plans support team collaboration. Team members can interact with the same trained agents, with permissions managed through role-based access controls.',
+      answer: 'Yes. Your projects are saved securely in our cloud database (powered by Supabase), and we use industry-standard encryption to protect your account and designs.',
     },
   ];
 
