@@ -150,6 +150,7 @@ export default function LayersPanel() {
   const [layersCollapsed, setLayersCollapsed] = useState(false);
   const [newPageName, setNewPageName] = useState('');
   const [isAddingPage, setIsAddingPage] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -196,6 +197,13 @@ export default function LayersPanel() {
       default: return <Layers size={14} />;
     }
   };
+
+  // Filter components based on search query
+  const filteredComponents = components.filter(comp => 
+    searchQuery.trim() === '' || 
+    comp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    comp.type.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div className="w-64 bg-[#1e1e1e] border-r border-[#333] flex flex-col h-full flex-shrink-0 select-none">
@@ -263,6 +271,20 @@ export default function LayersPanel() {
         </div>
 
         {!layersCollapsed && (
+            <>
+            {/* Search Input */}
+            <div className="px-2 pt-2 pb-1">
+                <div className="relative">
+                    <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <input 
+                        type="text"
+                        placeholder="Search layers..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full bg-[#333] text-white text-xs pl-7 pr-2 py-1.5 rounded border border-gray-700 outline-none focus:border-purple-500"
+                    />
+                </div>
+            </div>
             <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
                 <DndContext 
                     sensors={sensors}
@@ -270,10 +292,10 @@ export default function LayersPanel() {
                     onDragEnd={handleDragEnd}
                 >
                     <SortableContext 
-                        items={components.map(c => c.id)}
+                        items={filteredComponents.map(c => c.id)}
                         strategy={verticalListSortingStrategy}
                     >
-                        {components.map((comp) => (
+                        {filteredComponents.map((comp) => (
                             <SortableLayerItem 
                                 key={comp.id}
                                 comp={comp}
@@ -286,12 +308,18 @@ export default function LayersPanel() {
                         ))}
                     </SortableContext>
                 </DndContext>
+                {filteredComponents.length === 0 && components.length > 0 && (
+                    <div className="text-center py-10 opacity-30 text-xs">
+                        No matching layers
+                    </div>
+                )}
                 {components.length === 0 && (
                     <div className="text-center py-10 opacity-30 text-xs">
                         No layers on this page
                     </div>
                 )}
             </div>
+            </>
         )}
       </div>
 

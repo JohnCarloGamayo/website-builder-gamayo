@@ -66,6 +66,7 @@ interface EditorState {
   hoveredId: string | null;
   zoom: number;
   showGrid: boolean;
+  snapToGrid: boolean;
   canvasWidth: number;
   canvasHeight: number;
   history: ComponentData[][];
@@ -85,6 +86,7 @@ interface EditorState {
   removeComponent: (id: string) => void;
   duplicateComponent: (id: string) => void;
   selectComponent: (id: string | null, multi?: boolean) => void;
+  selectAllComponents: () => void;
   hoverComponent: (id: string | null) => void;
   moveComponent: (id: string, x: number, y: number) => void;
   resizeComponent: (id: string, width: number, height: number) => void;
@@ -95,6 +97,7 @@ interface EditorState {
   setZoom: (zoom: number) => void;
   setCanvasSize: (width: number, height: number) => void;
   toggleGrid: () => void;
+  toggleSnapToGrid: () => void;
   
   undo: () => void;
   redo: () => void;
@@ -122,6 +125,7 @@ export const useEditorStore = create<EditorState>()(
       hoveredId: null,
       zoom: 100,
       showGrid: true,
+      snapToGrid: false,
       canvasWidth: 1440, // Default to standard desktop
       canvasHeight: 1200,
       history: [defaultComponents],
@@ -306,6 +310,15 @@ export const useEditorStore = create<EditorState>()(
              set({ selectedId: id, selectedIds: id ? [id] : [] });
          }
       },
+
+      selectAllComponents: () => {
+         const { components } = get();
+         const allIds = components.filter(c => c.visible !== false).map(c => c.id);
+         if (allIds.length > 0) {
+             set({ selectedIds: allIds, selectedId: allIds[0] });
+         }
+      },
+
       hoverComponent: (id) => set({ hoveredId: id }),
       
       moveComponent: (id, x, y) => {
@@ -452,6 +465,7 @@ export const useEditorStore = create<EditorState>()(
 
       setZoom: (zoom) => set({ zoom }),
       toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
+      toggleSnapToGrid: () => set((state) => ({ snapToGrid: !state.snapToGrid })),
 
       undo: () => {
         const { history, historyIndex } = get();

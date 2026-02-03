@@ -3,16 +3,18 @@
 import { useEditorStore, ComponentData } from '@/store/editorStore';
 import { useRef, useState, useEffect } from 'react';
 import { Rnd } from 'react-rnd';
+import ContextMenu from './ContextMenu';
 
 export default function EditorCanvas() {
   const { 
-    components, selectedId, selectedIds, hoveredId, zoom, showGrid, canvasWidth, canvasHeight,
+    components, selectedId, selectedIds, hoveredId, zoom, showGrid, snapToGrid, canvasWidth, canvasHeight,
     selectComponent, hoverComponent, moveComponent, resizeComponent, saveHistory, setCanvasSize,
-    groupSelected, ungroupSelected, duplicateComponent, removeComponent
+    groupSelected, ungroupSelected, duplicateComponent, removeComponent, selectAllComponents, setZoom
   } = useEditorStore();
   
   const canvasRef = useRef<HTMLDivElement>(null);
   const [handle, setHandle] = useState<string | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; componentId: string | null } | null>(null);
 
   // Keyboard Shortcuts
   useEffect(() => {
@@ -42,17 +44,23 @@ export default function EditorCanvas() {
         // Select All: Ctrl + A
         if (isCtrl && e.key === 'a') {
             e.preventDefault();
-            const allIds = components.map(c => c.id);
-            // We need a selectComponents (plural) or just hack it by iterating? 
-            // The store might not have a setSelection.
-            // Let's iterate or check if selectComponent handles it.
-            // Actually, based on typical implementations, checking the store logic would be best.
-            // But we don't have a 'selectAll' function in the destructuring above.
-            // Let's skip Select All for this iteration or implement it roughly if possible.
-            // Wait, I can loop selectComponent? No, that would toggle. 
-            // I'll skip Ctrl+A for a moment or use a store action if I had one.
-            // Looking at store interface in previous turn: selectComponent(id, multi).
-            // I'll leave Ctrl+A for now as it might be complex without a helper.
+            selectAllComponents();
+        }
+
+        // Deselect: Esc
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            selectComponent(null);
+        }
+
+        // Zoom: + or - keys
+        if (e.key === '=' || e.key === '+') {
+            e.preventDefault();
+            setZoom(Math.min(200, zoom + 10));
+        }
+        if (e.key === '-' || e.key === '_') {
+            e.preventDefault();
+            setZoom(Math.max(25, zoom - 10));
         }
 
         // Delete: Delete or Backspace
@@ -116,7 +124,26 @@ export default function EditorCanvas() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [groupSelected, ungroupSelected, selectedId, selectedIds, components, duplicateComponent, moveComponent, removeComponent]);
+  }, [groupSelected, ungroupSelected, selectedId, selectedIds, components, duplicateComponent, moveComponent, removeComponent, selectAllComponents, selectComponent, zoom, setZoom]);
+
+  // Mouse wheel zoom: Ctrl + Scroll
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -10 : 10;
+        setZoom(Math.max(25, Math.min(200, zoom + delta)));
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    return () => window.removeEventListener('wheel', handleWheel);
+  }, [zoom, setZoom]);
+
+  // Snap to grid helper
+  const snapToGridValue = (value: number, gridSize = 10) => {
+    return snapToGrid ? Math.round(value / gridSize) * gridSize : value;
+  };
 
   const startResizeCanvas = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -303,10 +330,14 @@ export default function EditorCanvas() {
           }
         }}
         onDrag={(e, d) => {
-          moveComponent(comp.id, d.x, d.y);
+          const snappedX = snapToGridValue(d.x);
+          const snappedY = snapToGridValue(d.y);
+          moveComponent(comp.id, snappedX, snappedY);
         }}
         onDragStop={(e, d) => {
-          moveComponent(comp.id, d.x, d.y);
+          const snappedX = snapToGridValue(d.x);
+          const snappedY = snapToGridValue(d.y);
+          moveComponent(comp.id, snappedX, snappedY);
           saveHistory();
         }}
         onResize={(e, direction, ref, delta, position) => {
@@ -320,6 +351,12 @@ export default function EditorCanvas() {
         }}
         onClick={(e: React.MouseEvent) => {
           e.stopPropagation();
+        }}
+        onContextMenu={(e: React.MouseEvent) => {
+          e.preventDefault();
+          e.stopPropagation();
+          selectComponent(comp.id);
+          setContextMenu({ x: e.clientX, y: e.clientY, componentId: comp.id });
         }}
         onMouseEnter={() => hoverComponent(comp.id)}
         onMouseLeave={() => hoverComponent(null)}

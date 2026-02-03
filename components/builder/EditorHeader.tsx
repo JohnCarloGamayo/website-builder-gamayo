@@ -6,19 +6,20 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
   Undo2, Redo2, Save, Download, Upload, Eye, 
-  Grid3X3, ZoomIn, ZoomOut, RotateCcw, Home, Check
+  Grid3X3, ZoomIn, ZoomOut, RotateCcw, Home, Check, Magnet, Monitor, Tablet, Smartphone
 } from 'lucide-react';
 
 export default function EditorHeader() {
   const router = useRouter();
   const { 
-    zoom, setZoom, showGrid, toggleGrid,
+    zoom, setZoom, showGrid, toggleGrid, snapToGrid, toggleSnapToGrid,
     undo, redo, exportDesign, importDesign, resetToDefault,
-    history, historyIndex, saveHistory
+    history, historyIndex, saveHistory, setCanvasSize
   } = useEditorStore();
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saved, setSaved] = useState(false);
+  const [previewMode, setPreviewMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
 
   const handleExport = () => {
     const data = exportDesign();
@@ -54,6 +55,12 @@ export default function EditorHeader() {
     // Save first, then navigate to preview
     saveHistory();
     router.push('/preview');
+  };
+
+  const handlePreviewMode = (mode: 'desktop' | 'tablet' | 'mobile') => {
+    setPreviewMode(mode);
+    const widths = { desktop: 1440, tablet: 768, mobile: 375 };
+    setCanvasSize(widths[mode], 1200);
   };
 
   return (
@@ -130,6 +137,50 @@ export default function EditorHeader() {
         >
           <Grid3X3 size={18} />
         </button>
+
+        {/* Snap to Grid Toggle */}
+        <button
+          onClick={toggleSnapToGrid}
+          className={`p-2 rounded-lg transition-colors ${
+            snapToGrid ? 'bg-purple-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'
+          }`}
+          title="Snap to Grid"
+        >
+          <Magnet size={18} />
+        </button>
+
+        <div className="h-6 w-px bg-gray-700" />
+
+        {/* Responsive Preview Modes */}
+        <div className="flex items-center gap-1 bg-gray-800 rounded-lg">
+          <button
+            onClick={() => handlePreviewMode('desktop')}
+            className={`p-2 rounded-lg transition-colors ${
+              previewMode === 'desktop' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'
+            }`}
+            title="Desktop (1440px)"
+          >
+            <Monitor size={16} />
+          </button>
+          <button
+            onClick={() => handlePreviewMode('tablet')}
+            className={`p-2 rounded-lg transition-colors ${
+              previewMode === 'tablet' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'
+            }`}
+            title="Tablet (768px)"
+          >
+            <Tablet size={16} />
+          </button>
+          <button
+            onClick={() => handlePreviewMode('mobile')}
+            className={`p-2 rounded-lg transition-colors ${
+              previewMode === 'mobile' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'
+            }`}
+            title="Mobile (375px)"
+          >
+            <Smartphone size={16} />
+          </button>
+        </div>
       </div>
 
       {/* Right - Actions */}
