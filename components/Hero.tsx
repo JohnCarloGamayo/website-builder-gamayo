@@ -38,10 +38,10 @@ export default function Hero() {
       
       <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
         {/* Badge */}
-        <div className="mb-8 flex items-center justify-center gap-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full px-5 py-2 w-fit mx-auto animate-fade-in-up hover:bg-white/10 transition duration-300">
+        <div className="mb-8 flex items-center justify-center gap-2 bg-green-500/10 backdrop-blur-xl border border-green-500/30 rounded-full px-5 py-2 w-fit mx-auto animate-fade-in-up hover:bg-green-500/20 transition duration-300">
           <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-          <span className="text-sm text-gray-300 font-medium tracking-wide">
-             Now with Multi-Page Support
+          <span className="text-sm text-green-300 font-medium tracking-wide">
+             🎉 100% Free During Beta Testing
           </span>
         </div>
 
@@ -49,26 +49,26 @@ export default function Hero() {
         <div className="relative mb-8">
           <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight animate-fade-in-up tracking-tight" style={{ animationDelay: '0.1s' }}>
             <span className="bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent drop-shadow-lg">
-              Build Your Vision.
+              Build Websites
             </span>
             <br />
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent drop-shadow-2xl">
-              No Code Required.
+              Like a Pro. For Free.
             </span>
           </h1>
         </div>
 
         {/* Subtitle */}
         <p className="text-lg sm:text-l md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-in-up font-light" style={{ animationDelay: '0.2s' }}>
-          Craft stunning, professional websites in minutes with our intuitive drag-and-drop builder. Design, customize, and launch—all from one powerful platform.
+          Design stunning, responsive websites with our powerful drag-and-drop builder. Export clean HTML/CSS or React code. No signup required—completely free during beta!
         </p>
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up mb-16" style={{ animationDelay: '0.3s' }}>
           <Link href="/editor"
-            className="group px-8 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-[length:200%_200%] animate-gradient-x hover:brightness-110 text-white font-semibold rounded-full transition-all transform hover:scale-105 hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] w-full sm:w-auto flex items-center justify-center gap-2"
+            className="group px-8 py-4 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 bg-[length:200%_200%] animate-gradient-x hover:brightness-110 text-white font-semibold rounded-full transition-all transform hover:scale-105 hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] w-full sm:w-auto flex items-center justify-center gap-2"
           >
-            Start Building Free
+            Start Building — It's Free
             <ArrowRight size={20} className="group-hover:translate-x-1 transition duration-300" />
           </Link>
           <button 
@@ -76,7 +76,7 @@ export default function Hero() {
             className="px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white font-semibold rounded-full transition duration-300 w-full sm:w-auto backdrop-blur-sm flex items-center gap-2"
           >
             <LayoutTemplate size={18} />
-            View Templates
+            See Features
           </button>
         </div>
 
