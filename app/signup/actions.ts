@@ -8,17 +8,25 @@ import { createClient } from '@/lib/supabase/server'
 export async function signup(formData: FormData) {
   const supabase = await createClient()
 
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  }
+  const email = formData.get('email') as string
+  const password = formData.get('password') as string
 
-  const { error } = await supabase.auth.signUp(data)
+  // Use signInWithOtp to send OTP instead of creating account immediately
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: true,
+      data: {
+        // Store password for later account creation after OTP verification
+        temp_password: password
+      }
+    }
+  })
 
   if (error) {
     redirect(`/signup?message=${encodeURIComponent(error.message)}`)
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/editor')
+  // Redirect to OTP verification page
+  redirect(`/verify-otp?email=${encodeURIComponent(email)}`)
 }
