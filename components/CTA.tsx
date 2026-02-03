@@ -26,10 +26,10 @@ export default function CTA() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link 
-              href="/signup"
+              href="/editor"
               className="group px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition duration-300 flex items-center gap-2 hover:shadow-2xl hover:shadow-purple-500/50 transform hover:scale-105"
             >
-              Start Free Trial
+              Start Building Now
               <ArrowRight size={20} className="group-hover:translate-x-1 transition duration-300" />
             </Link>
             <button 
