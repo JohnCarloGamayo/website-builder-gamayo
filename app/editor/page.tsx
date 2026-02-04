@@ -8,13 +8,39 @@ import FloatingToolbar from '@/components/builder/FloatingToolbar'; // New
 import AutoSave from '@/components/builder/AutoSave';
 import { useEditorStore } from '@/store/editorStore';
 import { Button } from '@/components/ui/button';
-import { Trash2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Trash2, PanelLeftClose, PanelLeftOpen, Loader2 } from 'lucide-react';
 import TemplateModal from '@/components/builder/TemplateModal';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
 
 export default function EditorPage() {
+  const router = useRouter();
   const { resetToDefault, components } = useEditorStore();
   const [showLeftSidebar, setShowLeftSidebar] = useState(true);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function checkAuth() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+      setIsAuthChecking(false);
+    }
+    checkAuth();
+  }, [router, supabase.auth]);
+
+  if (isAuthChecking) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-[#1e1e1e] text-white">
+        <Loader2 className="animate-spin mr-2" size={24} />
+        <span>Loading...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex flex-col bg-[#1e1e1e] overflow-hidden text-gray-300">

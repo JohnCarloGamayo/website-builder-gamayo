@@ -59,6 +59,7 @@ export interface Page {
 interface EditorState {
   pages: Page[];
   currentPageId: string;
+  currentProjectId: string | null; // Database ID
 
   components: ComponentData[]; // Active page components
   selectedId: string | null;
@@ -75,6 +76,8 @@ interface EditorState {
   historyIndex: number;
   
   // Page Actions
+  setPages: (pages: Page[]) => void;
+  setCurrentProjectId: (id: string | null) => void;
   addPage: (name: string) => void;
   switchPage: (pageId: string) => void;
   deletePage: (pageId: string) => void;
@@ -123,6 +126,7 @@ export const useEditorStore = create<EditorState>()(
     (set, get) => ({
       pages: defaultPages,
       currentPageId: 'home',
+      currentProjectId: null,
       components: defaultComponents,
       selectedId: null,
       selectedIds: [],
@@ -144,6 +148,24 @@ export const useEditorStore = create<EditorState>()(
         
         set({ components, pages: updatedPages, history: [components], historyIndex: 0 });
       },
+
+      setPages: (pages) => {
+        // When force setting pages (e.g. from load), we should likely also reset the current page to the first one if the current one doesn't exist?
+        // Or just let the caller handle switching.
+        // For safety, let's sync components if we are on a valid page
+        const { currentPageId } = get();
+        const currentPage = pages.find(p => p.id === currentPageId) || pages[0];
+        
+        set({
+           pages,
+           currentPageId: currentPage.id,
+           components: currentPage.components, 
+           history: [currentPage.components],
+           historyIndex: 0
+        });
+      },
+
+      setCurrentProjectId: (id) => set({ currentProjectId: id }),
       
       addPage: (name) => {
          const { pages, components, canvasHeight, currentPageId } = get();
@@ -567,7 +589,7 @@ export const useEditorStore = create<EditorState>()(
           return canvasWidth / baseCanvasWidth;
       },
 
-      resetToDefault: () => set({ pages: defaultPages, currentPageId: 'home', components: [], history: [[]], historyIndex: 0, previewMode: 'desktop', canvasWidth: 1440 }),
+      resetToDefault: () => set({ pages: defaultPages, currentPageId: 'home', currentProjectId: null, components: [], history: [[]], historyIndex: 0, previewMode: 'desktop', canvasWidth: 1440 }),
     }),
     {
       name: 'website-builder',

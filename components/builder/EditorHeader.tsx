@@ -4,9 +4,11 @@ import { useEditorStore } from '@/store/editorStore';
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
 import { 
   Undo2, Redo2, Save, Download, Upload, Eye, 
-  Grid3X3, ZoomIn, ZoomOut, RotateCcw, Home, Check, Magnet, Monitor, Tablet, Smartphone, Code, FileJson, FileArchive
+  Grid3X3, ZoomIn, ZoomOut, RotateCcw, Home, Check, Magnet, Monitor, Tablet, Smartphone, Code, FileJson, FileArchive, Loader2
 } from 'lucide-react';
 import { generateHTMLExport, generateReactExport, generateZipExport } from '@/lib/export';
 
@@ -15,12 +17,15 @@ export default function EditorHeader() {
   const { 
     zoom, setZoom, showGrid, toggleGrid, snapToGrid, toggleSnapToGrid,
     undo, redo, exportDesign, importDesign, resetToDefault,
-    history, historyIndex, saveHistory, setPreviewMode, previewMode
+    history, historyIndex, saveHistory, setPreviewMode, previewMode,
+    currentProjectId, setCurrentProjectId
   } = useEditorStore();
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saved, setSaved] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const supabase = createClient();
 
   const handleExport = () => {
     const data = exportDesign();
@@ -78,11 +83,70 @@ export default function EditorHeader() {
     }
   };
 
-  const handleSave = () => {
-    // Save is automatic via zustand persist, but we can force it
-    saveHistory();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const handleSave = async () => {
+    setIsSaving(true);
+    saveHistory(); // Local history
+    
+    try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+            toast.error("Please login to save your work");
+            // Optionally redirect, but might lose work. Better to let them login in a new tab or modal?
+            // For now, simple redirect warning
+            if (confirm("You are not logged in. Navigate to login? Your work might be lost if not manually exported.")) {
+                router.push('/login');
+            }
+            return;
+        }
+
+        const state = useEditorStore.getState();
+
+        if (currentProjectId) {
+            // Update existing
+            const { error } = await supabase
+                .from('projects')
+                .update({ 
+                    pages: state.pages, 
+                    updated_at: new Date().toISOString() 
+                })
+                .eq('id', currentProjectId);
+            
+            if (error) throw error;
+            toast.success("Project saved!");
+        } else {
+            // Create new
+            const name = window.prompt("Enter project name:", "My Awesome Site");
+            if (!name) {
+                setIsSaving(false);
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from('projects')
+                .insert({
+                    user_id: user.id,
+                    name,
+                    pages: state.pages
+                })
+                .select()
+                .single();
+            
+            if (error) throw error;
+            if (data) {
+                setCurrentProjectId(data.id);
+                toast.success("Project created!");
+            }
+        }
+        
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+
+    } catch (error: any) {
+        console.error(error);
+        toast.error("Failed to save: " + error.message);
+    } finally {
+        setIsSaving(false);
+    }
   };
 
   const handlePreview = () => {
@@ -286,14 +350,15 @@ export default function EditorHeader() {
 
         <button
           onClick={handleSave}
+          disabled={isSaving}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors text-sm font-medium ${
             saved 
               ? 'bg-green-600 text-white' 
-              : 'bg-purple-600 hover:bg-purple-700 text-white'
+              : isSaving ? 'bg-purple-700 text-gray-200' : 'bg-purple-600 hover:bg-purple-700 text-white'
           }`}
         >
-          {saved ? <Check size={16} /> : <Save size={16} />}
-          <span>{saved ? 'Saved!' : 'Save'}</span>
+          {saved ? <Check size={16} /> : isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+          <span>{saved ? 'Saved!' : isSaving ? 'Saving...' : 'Save'}</span>
         </button>
 
         <button

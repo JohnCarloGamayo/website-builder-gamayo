@@ -1,12 +1,37 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { Menu, X, Layers } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Menu, X, Layers, User, LogOut } from 'lucide-react';
 import Image from 'next/image';
+import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+     const checkUser = async () => {
+         const { data: { user } } = await supabase.auth.getUser();
+         setUser(user);
+     };
+     checkUser();
+
+     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUser(session?.user ?? null);
+     });
+     
+     return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
+    setMobileMenuOpen(false);
+  };
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -45,13 +70,40 @@ export default function Header() {
 
         {/* Right Section */}
         <div className="flex items-center gap-4">
-          {/* Get Started Button - Desktop */}
-          <Link 
-            href="/editor"
-            className="hidden md:block px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition duration-300 hover:shadow-lg hover:shadow-purple-500/50 transform hover:scale-105"
-          >
-            Get Started
-          </Link>
+          {user ? (
+            <>
+             <Link 
+              href="/dashboard"
+              className="hidden md:flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition duration-300 hover:shadow-lg hover:shadow-purple-500/50"
+            >
+               <Layers size={18} /> My Templates
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="hidden md:flex items-center gap-2 px-4 py-2 border border-gray-700 hover:border-red-500 hover:bg-red-500/10 text-gray-300 hover:text-red-400 rounded-lg font-semibold transition duration-300"
+            >
+              <LogOut size={18} /> Logout
+            </button>
+            </>
+          ) : (
+            <>
+              {/* Login Button - Desktop */}
+              <Link 
+                href="/login"
+                className="hidden md:block text-gray-300 hover:text-white font-medium transition duration-300"
+              >
+                Login
+              </Link>
+
+              {/* Get Started Button - Desktop */}
+              <Link 
+                href="/signup"
+                className="hidden md:block px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition duration-300 hover:shadow-lg hover:shadow-purple-500/50 transform hover:scale-105"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
 
           {/* Mobile Menu Button */}
           <button 
@@ -79,12 +131,37 @@ export default function Header() {
             <button onClick={() => scrollToSection('faq')} className="text-gray-400 hover:text-white transition py-2 duration-300 text-left">
               FAQ
             </button>
-            <Link 
-              href="/editor"
-              className="w-full text-center px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition duration-300 mt-4"
-            >
-              Get Started
-            </Link>
+            {user ? (
+               <>
+                <Link 
+                  href="/dashboard"
+                  className="w-full text-center px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition duration-300 mt-4 flex items-center justify-center gap-2"
+                >
+                  <Layers size={18} /> My Templates
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-center px-6 py-2 border border-gray-700 hover:border-red-500 hover:bg-red-500/10 text-gray-300 hover:text-red-400 rounded-lg font-semibold transition duration-300 flex items-center justify-center gap-2"
+                >
+                  <LogOut size={18} /> Logout
+                </button>
+               </>
+            ) : (
+                <div className="flex gap-2 mt-4">
+                  <Link 
+                    href="/login"
+                    className="flex-1 text-center px-6 py-2 border border-gray-700 hover:border-white text-gray-300 hover:text-white rounded-lg font-semibold transition duration-300"
+                  >
+                    Login
+                  </Link>
+                  <Link 
+                    href="/signup"
+                    className="flex-1 text-center px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition duration-300"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+            )}
           </nav>
         </div>
       )}

@@ -24,7 +24,7 @@ export default function Footer() {
 
           {/* Useful Links */}
           <div className="animate-fade-in-up" style={{ animationDelay: '0.05s' }}>
-            <h3 className="text-orange-500 font-bold text-lg mb-4">Platform</h3>
+            <h3 className="text-purple-400 font-bold text-lg mb-4">Platform</h3>
             <ul className="space-y-3">
               <li>
                 <button onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="text-gray-400 hover:text-white transition duration-300 hover:translate-x-1 inline-block">
@@ -51,7 +51,7 @@ export default function Footer() {
 
           {/* Help */}
           <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-            <h3 className="text-orange-500 font-bold text-lg mb-4">Support</h3>
+            <h3 className="text-purple-400 font-bold text-lg mb-4">Support</h3>
             <ul className="space-y-3">
               <li>
                 <button onClick={() => window.location.href = '#support'} className="text-gray-400 hover:text-white transition duration-300 hover:translate-x-1 inline-block">
@@ -83,18 +83,18 @@ export default function Footer() {
 
           {/* Connect */}
           <div className="animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
-            <h3 className="text-orange-500 font-bold text-lg mb-4">Contact</h3>
+            <h3 className="text-purple-400 font-bold text-lg mb-4">Contact</h3>
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-gray-400 hover:text-white transition duration-300">
-                <Mail size={18} className="mt-1 flex-shrink-0 text-orange-500" />
+                <Mail size={18} className="mt-1 flex-shrink-0 text-purple-400" />
                 <a href="mailto:support@webbuilder.com" className="text-sm">support@webbuilder.com</a>
               </li>
               <li className="flex items-start gap-3 text-gray-400 hover:text-white transition duration-300">
-                <Phone size={18} className="mt-1 flex-shrink-0 text-orange-500" />
+                <Phone size={18} className="mt-1 flex-shrink-0 text-purple-400" />
                 <span className="text-sm">+1 (555) 987-6543</span>
               </li>
               <li className="flex items-start gap-3 text-gray-400 hover:text-white transition duration-300">
-                <MapPin size={18} className="mt-1 flex-shrink-0 text-orange-500" />
+                <MapPin size={18} className="mt-1 flex-shrink-0 text-purple-400" />
                 <span className="text-sm">123 Web St, Tech City, TC 12345</span>
               </li>
             </ul>

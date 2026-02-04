@@ -81,10 +81,6 @@ export default function Pricing() {
               <Rocket size={20} />
               Start Building Now
             </button>
-
-            <p className="text-center text-gray-500 text-sm mt-4">
-              No credit card required • No signup needed
-            </p>
           </div>
         </div>
 

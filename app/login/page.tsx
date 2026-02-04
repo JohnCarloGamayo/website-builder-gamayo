@@ -1,102 +1,68 @@
 'use client';
-import Link from 'next/link'
-import { login } from './actions'
-import React, { Suspense } from 'react'
-import { useToast } from "@/components/ui/use-toast"
-import { useSearchParams } from 'next/navigation'
 
-function LoginForm() {
-  const { toast } = useToast()
-  const searchParams = useSearchParams()
-  const message = searchParams.get('message')
+import AuthLayout from '@/components/auth/AuthLayout';
+import { login } from './actions';
+import { useActionState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
 
-  React.useEffect(() => {
-    if (message) {
-      toast({
-        variant: "destructive",
-        title: "Login Error",
-        description: message,
-      })
-    }
-  }, [message, toast])
+const initialState = {
+  error: '',
+};
+
+export default function LoginPage() {
+  const [state, formAction, isPending] = useActionState(login, initialState);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0d0d1a] text-white p-4">
-      <div className="w-full max-w-md space-y-8 bg-[#1e1e2e] p-8 rounded-xl border border-gray-800 shadow-2xl">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight">Welcome back</h2>
-          <p className="mt-2 text-sm text-gray-400">
-            Sign in to your account
-          </p>
+    <AuthLayout>
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
+        <p className="text-gray-400">Sign in to continue to your dashboard.</p>
+      </div>
+
+      <form action={formAction} className="space-y-6">
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-gray-300">Email Address</Label>
+          <Input id="email" name="email" type="email" placeholder="john@example.com" required className="bg-[#1a1a2e] border-[#2a2a3e] text-white" />
         </div>
 
-        <form className="mt-8 space-y-6">
-          <div className="space-y-4 rounded-md shadow-sm">
-            <div>
-              <label htmlFor="email-address" className="block text-sm font-medium text-gray-400 mb-1">
-                Email address
-              </label>
-              <input
-                id="email-address"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="relative block w-full rounded-md border border-gray-700 bg-[#2a2a3e] px-3 py-2 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 sm:text-sm"
-                placeholder="you@example.com"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-400 mb-1">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                className="relative block w-full rounded-md border border-gray-700 bg-[#2a2a3e] px-3 py-2 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500 sm:text-sm"
-                placeholder="••••••••"
-              />
-            </div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password" className="text-gray-300">Password</Label>
+            <Link href="/forgot-password" className="text-xs text-purple-400 hover:text-purple-300">
+              Forgot password?
+            </Link>
           </div>
-
-          {message && (
-            <div className="p-3 bg-red-900/50 border border-red-500/50 rounded text-sm text-red-200 text-center">
-              {message}
-            </div>
-          )}
-
-          <div>
-            <button
-              formAction={login}
-              className="group relative flex w-full justify-center rounded-md border border-transparent bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
-            >
-              Sign in
-            </button>
-          </div>
-        </form>
-        
-        <div className="text-center text-sm">
-           <span className="text-gray-400">Don't have an account? </span>
-           <Link href="/signup" className="font-medium text-purple-400 hover:text-purple-300">
-             Sign up
-           </Link>
+          <Input id="password" name="password" type="password" required className="bg-[#1a1a2e] border-[#2a2a3e] text-white" />
         </div>
+
+        {state?.error && (
+          <div className="p-3 rounded bg-red-500/10 border border-red-500/20 text-red-500 text-sm text-center">
+            {state.error}
+          </div>
+        )}
+
+        <Button 
+          type="submit" 
+          disabled={isPending}
+          className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-6"
+        >
+          {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Sign In'}
+        </Button>
+      </form>
+
+      <div className="text-center mt-6">
+        <p className="text-gray-400 text-sm">
+          Don't have an account?{' '}
+          <Link href="/signup" className="text-purple-400 hover:text-purple-300 font-medium">
+            Sign Up
+          </Link>
+        </p>
       </div>
-    </div>
-  )
+    </AuthLayout>
+  );
 }
 
-export default function Login() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#0d0d1a] text-white">
-        <div className="text-gray-400">Loading...</div>
-      </div>
-    }>
-      <LoginForm />
-    </Suspense>
-  )
-}
