@@ -3,7 +3,13 @@
 import { useEditorStore, ComponentData } from '@/store/editorStore';
 import { 
   Type, Square, Image as ImageIcon, MousePointer2, 
-  Circle, Video, FormInput, Minus, ChevronRight, Layout
+  Circle, Video, FormInput, Minus, ChevronRight, Layout,
+  Heading1, Heading2, AlignLeft, Link2, CreditCard, Tag,
+  Volume2, Code, CheckSquare, Circle as RadioIcon, List,
+  Grid2X2, Columns, Box, Menu as MenuIcon, Navigation,
+  AlignJustify, Table, ChevronDown, PanelTop, Layers,
+  Loader, AlertCircle, MessageSquare, Star, User, Quote,
+  MoreHorizontal
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -17,6 +23,7 @@ interface ToolGroup {
         label: string;
         defaultStyles?: Partial<ComponentData['styles']>;
         defaultContent?: string;
+        defaultProps?: Partial<ComponentData>;
     }[];
 }
 
@@ -31,22 +38,77 @@ const toolGroups: ToolGroup[] = [
         ]
     },
     {
+        name: 'Typography',
+        items: [
+            { type: 'heading', icon: Heading1, label: 'Heading', defaultContent: 'Main Heading', defaultStyles: { fontSize: 32, fontWeight: 'bold', width: 400, height: 50 } },
+            { type: 'paragraph', icon: AlignLeft, label: 'Paragraph', defaultContent: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', defaultStyles: { fontSize: 16, width: 400, height: 80, lineHeight: 1.5 } },
+            { type: 'link', icon: Link2, label: 'Link', defaultContent: 'Click here', defaultProps: { href: '#' }, defaultStyles: { textDecoration: 'underline', textColor: '#3b82f6', fontSize: 16 } },
+            { type: 'quote', icon: Quote, label: 'Quote', defaultContent: '"This is a blockquote"', defaultStyles: { fontSize: 18, fontStyle: 'italic', width: 400, height: 80, borderWidth: 2, borderColor: '#666666', padding: 16 } },
+        ]
+    },
+    {
+        name: 'Layout',
+        items: [
+            { type: 'section', icon: Box, label: 'Section', defaultStyles: { width: 800, height: 400, backgroundColor: '#f3f4f6', padding: 20 } },
+            { type: 'grid', icon: Grid2X2, label: 'Grid', defaultStyles: { width: 600, height: 400, backgroundColor: 'transparent' } },
+            { type: 'flex', icon: Columns, label: 'Flex Box', defaultStyles: { width: 600, height: 300, backgroundColor: 'transparent' } },
+            { type: 'card', icon: CreditCard, label: 'Card', defaultStyles: { width: 300, height: 200, backgroundColor: '#ffffff', borderRadius: 8, boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', padding: 16 } },
+        ]
+    },
+    {
         name: 'Media',
         items: [
-            { type: 'video', icon: Video, label: 'Video', defaultStyles: { width: 320, height: 180, backgroundColor: '#000000' } },
+            { type: 'video', icon: Video, label: 'Video', defaultStyles: { width: 640, height: 360, backgroundColor: '#000000' } },
+            { type: 'audio', icon: Volume2, label: 'Audio', defaultStyles: { width: 300, height: 40, backgroundColor: '#f3f4f6' } },
+            { type: 'embed', icon: Code, label: 'Embed', defaultContent: '<iframe src="https://www.example.com"></iframe>', defaultStyles: { width: 640, height: 480 } },
             { type: 'icon', icon: Circle, label: 'Icon', defaultStyles: { width: 50, height: 50, borderRadius: 25, backgroundColor: '#22ccdd' } },
         ]
     },
     {
         name: 'Forms',
         items: [
-            { type: 'input', icon: FormInput, label: 'Input', defaultContent: '', defaultStyles: { width: 250, height: 40, borderStyle: 'solid', borderWidth: 1, borderColor: '#cccccc', borderRadius: 4, padding: 8, backgroundColor: '#ffffff', textColor: '#000000' } },
+            { type: 'input', icon: FormInput, label: 'Input', defaultContent: '', defaultStyles: { width: 300, height: 40, borderStyle: 'solid', borderWidth: 1, borderColor: '#cccccc', borderRadius: 4, padding: 8, backgroundColor: '#ffffff', textColor: '#000000' } },
+            { type: 'textarea', icon: AlignJustify, label: 'Textarea', defaultContent: '', defaultStyles: { width: 300, height: 100, borderStyle: 'solid', borderWidth: 1, borderColor: '#cccccc', borderRadius: 4, padding: 8, backgroundColor: '#ffffff', textColor: '#000000' } },
+            { type: 'checkbox', icon: CheckSquare, label: 'Checkbox', defaultProps: { checked: false }, defaultStyles: { width: 20, height: 20, borderStyle: 'solid', borderWidth: 1, borderColor: '#cccccc' } },
+            { type: 'radio', icon: RadioIcon, label: 'Radio', defaultProps: { checked: false }, defaultStyles: { width: 20, height: 20, borderRadius: 10, borderStyle: 'solid', borderWidth: 1, borderColor: '#cccccc' } },
+            { type: 'select', icon: ChevronDown, label: 'Select', defaultProps: { options: ['Option 1', 'Option 2', 'Option 3'] }, defaultStyles: { width: 200, height: 40, borderStyle: 'solid', borderWidth: 1, borderColor: '#cccccc', borderRadius: 4, padding: 8, backgroundColor: '#ffffff' } },
+        ]
+    },
+    {
+        name: 'Navigation',
+        items: [
+            { type: 'navbar', icon: MenuIcon, label: 'Navbar', defaultStyles: { width: 1200, height: 60, backgroundColor: '#ffffff', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' } },
+            { type: 'menu', icon: List, label: 'Menu', defaultStyles: { width: 200, height: 300, backgroundColor: '#ffffff', borderRadius: 8, boxShadow: '0 4px 6px rgba(0,0,0,0.1)' } },
+            { type: 'breadcrumb', icon: Navigation, label: 'Breadcrumb', defaultContent: 'Home / Products / Item', defaultStyles: { width: 400, height: 30, fontSize: 14 } },
+        ]
+    },
+    {
+        name: 'Components',
+        items: [
+            { type: 'badge', icon: Tag, label: 'Badge', defaultContent: 'New', defaultStyles: { fontSize: 12, fontWeight: 'bold', backgroundColor: '#3b82f6', textColor: '#ffffff', borderRadius: 12, padding: 4, width: 60, height: 24 } },
+            { type: 'tag', icon: Tag, label: 'Tag', defaultContent: 'Tag', defaultStyles: { fontSize: 14, backgroundColor: '#e5e7eb', textColor: '#374151', borderRadius: 4, padding: 6, width: 80, height: 30 } },
+            { type: 'alert', icon: AlertCircle, label: 'Alert', defaultContent: 'This is an alert message', defaultStyles: { width: 500, height: 60, backgroundColor: '#fef3c7', textColor: '#92400e', borderRadius: 8, padding: 12, borderWidth: 1, borderColor: '#fbbf24' } },
+            { type: 'tooltip', icon: MessageSquare, label: 'Tooltip', defaultContent: 'Tooltip text', defaultStyles: { fontSize: 14, backgroundColor: '#1f2937', textColor: '#ffffff', borderRadius: 6, padding: 8, width: 150, height: 40 } },
+            { type: 'avatar', icon: User, label: 'Avatar', defaultStyles: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#d1d5db' } },
+            { type: 'rating', icon: Star, label: 'Rating', defaultContent: '★★★★☆', defaultStyles: { fontSize: 24, textColor: '#fbbf24', width: 120, height: 30 } },
+        ]
+    },
+    {
+        name: 'Data Display',
+        items: [
+            { type: 'list', icon: List, label: 'List', defaultContent: '• Item 1\n• Item 2\n• Item 3', defaultStyles: { width: 300, height: 100, fontSize: 16, lineHeight: 1.8 } },
+            { type: 'table', icon: Table, label: 'Table', defaultStyles: { width: 600, height: 300, backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#e5e7eb' } },
+            { type: 'accordion', icon: Layers, label: 'Accordion', defaultContent: 'Accordion Section', defaultStyles: { width: 500, height: 50, backgroundColor: '#f3f4f6', borderRadius: 8, padding: 12 } },
+            { type: 'tabs', icon: PanelTop, label: 'Tabs', defaultStyles: { width: 600, height: 300, backgroundColor: '#ffffff', borderRadius: 8 } },
+            { type: 'progress', icon: Loader, label: 'Progress', defaultProps: { value: 70 }, defaultStyles: { width: 300, height: 20, backgroundColor: '#e5e7eb', borderRadius: 10 } },
+            { type: 'slider', icon: MoreHorizontal, label: 'Slider', defaultProps: { value: 50 }, defaultStyles: { width: 300, height: 8, backgroundColor: '#e5e7eb', borderRadius: 4 } },
         ]
     },
     {
         name: 'Shapes',
         items: [
             { type: 'shape', icon: Circle, label: 'Circle', defaultStyles: { borderRadius: 9999, width: 100, height: 100, backgroundColor: '#3344cc' } },
+            { type: 'shape', icon: Square, label: 'Rectangle', defaultStyles: { width: 200, height: 100, backgroundColor: '#6366f1' } },
             { type: 'divider', icon: Minus, label: 'Divider', defaultStyles: { height: 2, width: 300, backgroundColor: '#000000' } },
         ]
     }
@@ -70,7 +132,7 @@ export default function ComponentsToolbar() {
       styles: {
         x: 50,
         y: Math.min(baseY, 400),
-        width: item.type === 'text' ? 300 : 150,
+        width: item.type === 'text' || item.type === 'paragraph' || item.type === 'heading' ? 300 : 150,
         height: item.type === 'text' ? 50 : 50,
         backgroundColor: 'transparent',
         textColor: '#ffffff',
@@ -82,6 +144,7 @@ export default function ComponentsToolbar() {
         ...item.defaultStyles
       },
       content: item.defaultContent || (item.type === 'button' ? 'Button' : undefined),
+      ...item.defaultProps
     };
 
     addComponent(newComponent);

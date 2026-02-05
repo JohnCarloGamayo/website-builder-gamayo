@@ -1,7 +1,7 @@
 'use client';
 
+import React, { useRef, useState, useEffect } from 'react';
 import { useEditorStore, ComponentData } from '@/store/editorStore';
-import { useRef, useState, useEffect } from 'react';
 import { Rnd } from 'react-rnd';
 import ContextMenu from './ContextMenu';
 
@@ -453,10 +453,13 @@ export default function EditorCanvas() {
         fontSize: comp.styles.fontSize,
         fontWeight: comp.styles.fontWeight,
         fontFamily: comp.styles.fontFamily,
+        fontStyle: comp.styles.fontStyle,
         textDecoration: comp.styles.textDecoration,
         borderRadius: comp.styles.borderRadius,
         opacity: comp.styles.opacity,
         textAlign: comp.styles.textAlign,
+        lineHeight: comp.styles.lineHeight,
+        letterSpacing: comp.styles.letterSpacing,
         padding: comp.styles.padding,
         borderStyle: comp.styles.borderStyle || 'solid',
         borderWidth: comp.styles.borderWidth,
@@ -474,14 +477,241 @@ export default function EditorCanvas() {
         justifyContent: comp.type === 'button' ? 'center' : comp.styles.textAlign === 'center' ? 'center' : comp.styles.textAlign === 'right' ? 'flex-end' : 'flex-start',
     };
 
-      if (comp.type === 'image' && comp.src) return <img src={comp.src} style={style} className="object-cover" />;
-      if (comp.type === 'text' || comp.type === 'button') return <div style={style}><div style={wrapperStyle}>{comp.content}</div></div>;
-      
-      return <div style={style}>{comp.content}</div>;
+      // Handle different component types
+      switch (comp.type) {
+        case 'image':
+          return <img src={comp.src || 'https://via.placeholder.com/150'} alt={comp.alt || 'Image'} style={style} className="object-cover" />;
+        
+        case 'video':
+          return <video src={comp.src} controls style={style} className="object-cover" />;
+        
+        case 'audio':
+          return <audio src={comp.src} controls style={{...style, height: 'auto'}} />;
+        
+        case 'embed':
+          return <div style={style} dangerouslySetInnerHTML={{ __html: comp.content || '' }} />;
+        
+        case 'icon':
+          return <div style={style}><div style={wrapperStyle}>🔷</div></div>;
+        
+        case 'text':
+        case 'button':
+          return <div style={style}><div style={wrapperStyle}>{comp.content}</div></div>;
+        
+        case 'heading':
+          return <h1 style={style}><div style={wrapperStyle}>{comp.content || 'Heading'}</div></h1>;
+        
+        case 'paragraph':
+          return <p style={style}>{comp.content || 'Paragraph text'}</p>;
+        
+        case 'link':
+          return <a href={comp.href || '#'} style={{...style, textDecoration: comp.styles.textDecoration || 'underline', cursor: 'pointer'}}>{comp.content || 'Link'}</a>;
+        
+        case 'quote':
+          return <blockquote style={{...style, borderLeft: `${comp.styles.borderWidth || 4}px ${comp.styles.borderStyle || 'solid'} ${comp.styles.borderColor || '#666'}`, paddingLeft: comp.styles.padding || 16, fontStyle: 'italic'}}>{comp.content || 'Quote'}</blockquote>;
+        
+        case 'container':
+        case 'section':
+        case 'card':
+          return <div style={style}><div style={{...wrapperStyle, alignItems: 'center'}}>{comp.content || ''}</div></div>;
+        
+        case 'grid':
+          return <div style={{...style, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', padding: comp.styles.padding || 10}}><div style={{background: '#f0f0f0', borderRadius: 4, padding: 8}}>Grid Item</div><div style={{background: '#f0f0f0', borderRadius: 4, padding: 8}}>Grid Item</div><div style={{background: '#f0f0f0', borderRadius: 4, padding: 8}}>Grid Item</div></div>;
+        
+        case 'flex':
+          return <div style={{...style, display: 'flex', gap: '10px', padding: comp.styles.padding || 10}}><div style={{background: '#f0f0f0', borderRadius: 4, padding: 8, flex: 1}}>Flex Item</div><div style={{background: '#f0f0f0', borderRadius: 4, padding: 8, flex: 1}}>Flex Item</div></div>;
+        
+        case 'input':
+          return <input type="text" placeholder={comp.placeholder || 'Enter text'} value={comp.value || ''} style={{...style, border: `${comp.styles.borderWidth || 1}px ${comp.styles.borderStyle || 'solid'} ${comp.styles.borderColor || '#ccc'}`}} readOnly />;
+        
+        case 'textarea':
+          return <textarea placeholder={comp.placeholder || 'Enter text'} value={comp.value || ''} style={{...style, border: `${comp.styles.borderWidth || 1}px ${comp.styles.borderStyle || 'solid'} ${comp.styles.borderColor || '#ccc'}`, resize: 'none'}} readOnly />;
+        
+        case 'checkbox':
+          return <input type="checkbox" checked={comp.checked || false} style={{...style, width: 'auto', height: 'auto', cursor: 'pointer'}} readOnly />;
+        
+        case 'radio':
+          return <input type="radio" checked={comp.checked || false} style={{...style, width: 'auto', height: 'auto', cursor: 'pointer'}} readOnly />;
+        
+        case 'select':
+          return <select style={{...style, border: `${comp.styles.borderWidth || 1}px ${comp.styles.borderStyle || 'solid'} ${comp.styles.borderColor || '#ccc'}`}} disabled>{(comp.options || ['Option 1', 'Option 2']).map((opt, i) => <option key={i}>{opt}</option>)}</select>;
+        
+        case 'badge':
+        case 'tag':
+          return <span style={{...style, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap'}}>{comp.content || 'Badge'}</span>;
+        
+        case 'alert':
+          return <div style={{...style, display: 'flex', alignItems: 'center', gap: '8px'}}><span>ℹ️</span><span>{comp.content || 'Alert message'}</span></div>;
+        
+        case 'tooltip':
+          return <div style={{...style, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: comp.styles.fontSize || 12}}>{comp.content || 'Tooltip'}</div>;
+        
+        case 'avatar':
+          return <div style={{...style, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: comp.styles.fontSize || 24}}>👤</div>;
+        
+        case 'rating':
+          return <div style={{...style, display: 'flex', alignItems: 'center'}}>{comp.content || '★★★★☆'}</div>;
+        
+        case 'navbar':
+          return <nav style={{...style, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: comp.styles.padding || 16}}><div style={{fontWeight: 'bold'}}>Brand</div><div style={{display: 'flex', gap: '16px'}}><span>Home</span><span>About</span><span>Contact</span></div></nav>;
+        
+        case 'menu':
+          return <ul style={{...style, listStyle: 'none', padding: comp.styles.padding || 8}}><li style={{padding: '8px', borderBottom: '1px solid #eee'}}>Menu Item 1</li><li style={{padding: '8px', borderBottom: '1px solid #eee'}}>Menu Item 2</li><li style={{padding: '8px'}}>Menu Item 3</li></ul>;
+        
+        case 'breadcrumb':
+          return <div style={style}>{comp.content || 'Home / Products / Item'}</div>;
+        
+        case 'list':
+          return <div style={{...style, whiteSpace: 'pre-wrap'}}>{comp.content || '• Item 1\n• Item 2\n• Item 3'}</div>;
+        
+        case 'table':
+          return <table style={{...style, borderCollapse: 'collapse'}}><thead><tr><th style={{border: '1px solid #ddd', padding: '8px'}}>Header 1</th><th style={{border: '1px solid #ddd', padding: '8px'}}>Header 2</th></tr></thead><tbody><tr><td style={{border: '1px solid #ddd', padding: '8px'}}>Data 1</td><td style={{border: '1px solid #ddd', padding: '8px'}}>Data 2</td></tr></tbody></table>;
+        
+        case 'accordion':
+          return <div style={{...style, cursor: 'pointer'}}><div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}><span>{comp.content || 'Accordion'}</span><span>▼</span></div></div>;
+        
+        case 'tabs':
+          return <div style={style}><div style={{display: 'flex', borderBottom: '1px solid #ddd', marginBottom: '8px'}}><div style={{padding: '8px 16px', borderBottom: '2px solid #3b82f6'}}>Tab 1</div><div style={{padding: '8px 16px'}}>Tab 2</div></div><div style={{padding: '16px'}}>Tab content</div></div>;
+        
+        case 'progress':
+          return <div style={{...style, backgroundColor: '#e5e7eb', borderRadius: comp.styles.borderRadius || 10, overflow: 'hidden'}}><div style={{width: `${comp.value || 70}%`, height: '100%', backgroundColor: '#3b82f6', transition: 'width 0.3s'}}></div></div>;
+        
+        case 'slider':
+          return <input type="range" value={comp.value || 50} style={{...style, height: 'auto', cursor: 'pointer'}} readOnly />;
+        
+        case 'modal':
+          return <div style={{...style, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.5)'}}><div style={{backgroundColor: '#fff', padding: '24px', borderRadius: '8px', maxWidth: '400px'}}><h3 style={{margin: '0 0 16px 0'}}>Modal Title</h3><p>{comp.content || 'Modal content'}</p></div></div>;
+        
+        case 'divider':
+          return <hr style={{...style, border: 'none', borderTop: `${comp.styles.height || 2}px ${comp.styles.borderStyle || 'solid'} ${comp.styles.backgroundColor || '#000'}`}} />;
+        
+        case 'shape':
+          return <div style={style}></div>;
+        
+        default:
+          return <div style={style}>{comp.content || comp.type}</div>;
+      }
   };
+
+  // Check for components that overflow in responsive mode
+  const overflowingComponents = components.filter(comp => {
+    if (previewMode === 'desktop') return false;
+    const componentRight = comp.styles.x + comp.styles.width;
+    const viewportWidth = previewMode === 'mobile' ? 375 : 768;
+    return componentRight > viewportWidth;
+  });
+
+  // Auto-fix overflowing components
+  const fixOverflowingComponents = () => {
+    const viewportWidth = previewMode === 'mobile' ? 375 : previewMode === 'tablet' ? 768 : 1440;
+    
+    overflowingComponents.forEach(comp => {
+      const componentRight = comp.styles.x + comp.styles.width;
+      if (componentRight > viewportWidth) {
+        // Calculate new width to fit within viewport with 20px margin
+        const maxWidth = viewportWidth - comp.styles.x - 20;
+        if (maxWidth > 50) { // Ensure minimum usable width
+          resizeComponent(comp.id, maxWidth, comp.styles.height);
+        } else {
+          // If component is too far right, move it and resize
+          const newX = 20;
+          const newWidth = viewportWidth - 40;
+          moveComponent(comp.id, newX, comp.styles.y);
+          resizeComponent(comp.id, newWidth, comp.styles.height);
+        }
+      }
+    });
+    
+    saveHistory();
+  };
+
+  // Fix single component overflow
+  const fixSingleComponent = (comp: ComponentData) => {
+    const viewportWidth = previewMode === 'mobile' ? 375 : previewMode === 'tablet' ? 768 : 1440;
+    const componentRight = comp.styles.x + comp.styles.width;
+    
+    if (componentRight > viewportWidth) {
+      const maxWidth = viewportWidth - comp.styles.x - 20;
+      if (maxWidth > 50) {
+        resizeComponent(comp.id, maxWidth, comp.styles.height);
+      } else {
+        const newX = 20;
+        const newWidth = viewportWidth - 40;
+        moveComponent(comp.id, newX, comp.styles.y);
+        resizeComponent(comp.id, newWidth, comp.styles.height);
+      }
+    }
+    
+    saveHistory();
+  };
+
+  // Device frame styles
+  const getDeviceFrameStyles = () => {
+    if (previewMode === 'mobile') {
+      return {
+        padding: '40px 12px 40px 12px',
+        background: 'linear-gradient(135deg, #1e1e1e 0%, #2a2a2a 100%)',
+        borderRadius: '42px',
+        boxShadow: '0 30px 60px rgba(0,0,0,0.5), inset 0 0 0 3px rgba(255,255,255,0.1)',
+        position: 'relative' as const,
+      };
+    } else if (previewMode === 'tablet') {
+      return {
+        padding: '32px 20px 32px 20px',
+        background: 'linear-gradient(135deg, #252525 0%, #333333 100%)',
+        borderRadius: '32px',
+        boxShadow: '0 25px 50px rgba(0,0,0,0.4), inset 0 0 0 2px rgba(255,255,255,0.08)',
+        position: 'relative' as const,
+      };
+    }
+    return {};
+  };
+
+  const deviceFrameStyles = getDeviceFrameStyles();
+  const hasDeviceFrame = previewMode !== 'desktop';
 
   return (
     <div className="flex-1 bg-[#0d0d1a] overflow-auto relative custom-scrollbar">
+      {/* Responsive Warning Banner */}
+      {overflowingComponents.length > 0 && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[100] animate-in slide-in-from-top duration-300">
+          <div className="bg-amber-500/95 backdrop-blur-xl text-amber-950 px-6 py-3 rounded-2xl shadow-2xl border border-amber-400/50 flex items-center gap-4">
+            <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <div className="flex flex-col">
+              <span className="font-bold text-sm">{overflowingComponents.length} component{overflowingComponents.length > 1 ? 's' : ''} exceed viewport width</span>
+              <span className="text-xs opacity-80">Some elements may be cut off on {previewMode} devices</span>
+            </div>
+            <button
+              onClick={fixOverflowingComponents}
+              className="ml-4 bg-amber-950 hover:bg-amber-900 text-amber-100 px-4 py-1.5 rounded-lg font-semibold text-sm transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Fix All
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Device Info Display */}
+      {previewMode !== 'desktop' && (
+        <div className="absolute top-4 right-4 z-[100]">
+          <div className="bg-gray-900/95 backdrop-blur-xl text-gray-100 px-4 py-2 rounded-xl shadow-xl border border-gray-700/50 flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${
+              previewMode === 'mobile' ? 'bg-blue-400' : 'bg-purple-400'
+            } animate-pulse`} />
+            <span className="text-xs font-medium uppercase tracking-wider">
+              {previewMode === 'mobile' ? 'iPhone 13 Pro' : 'iPad Pro 11"'}
+            </span>
+            <span className="text-xs opacity-60">•</span>
+            <span className="text-xs opacity-80">{canvasWidth}×{canvasHeight}px</span>
+          </div>
+        </div>
+      )}
+
       {/* Canvas Container */}
       <div 
         className="min-h-full p-8 flex items-start justify-center overflow-auto"
@@ -492,20 +722,72 @@ export default function EditorCanvas() {
           backgroundSize: '20px 20px',
         }}
       >
-        {/* Actual Canvas */}
-        <div
-          ref={canvasRef}
-          onClick={handleCanvasClick}
-          className="relative bg-white shadow-2xl transition-all duration-200 ease-in-out"
-          style={{
-            minWidth: canvasWidth,
-            width: canvasWidth,
-            minHeight: canvasHeight,
-            height: canvasHeight,
-            transform: `scale(${zoom / 100})`,
-            transformOrigin: 'top center',
-          }}
-        >
+        {/* Device Frame Wrapper */}
+        {hasDeviceFrame ? (
+          <div style={deviceFrameStyles}>
+            {/* Device Notch/Camera (Mobile only) */}
+            {previewMode === 'mobile' && (
+              <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-7 bg-black rounded-b-3xl z-10 flex items-center justify-center">
+                <div className="w-16 h-1.5 bg-gray-800 rounded-full" />
+              </div>
+            )}
+            
+            {/* Device Home Indicator (Mobile only) */}
+            {previewMode === 'mobile' && (
+              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-white/30 rounded-full" />
+            )}
+
+            {/* Actual Canvas */}
+            <div
+              ref={canvasRef}
+              onClick={handleCanvasClick}
+              className="relative bg-white transition-all duration-300 ease-in-out overflow-hidden"
+              style={{
+                minWidth: canvasWidth,
+                width: canvasWidth,
+                minHeight: canvasHeight,
+                height: canvasHeight,
+                transform: `scale(${zoom / 100})`,
+                transformOrigin: 'top center',
+                borderRadius: previewMode === 'mobile' ? '4px' : '8px',
+              }}
+            >
+              {/* Canvas content */}
+              {renderCanvasContent()}
+            </div>
+          </div>
+        ) : (
+          /* Desktop Canvas */
+          <div
+            ref={canvasRef}
+            onClick={handleCanvasClick}
+            className="relative bg-white shadow-2xl transition-all duration-200 ease-in-out"
+            style={{
+              minWidth: canvasWidth,
+              width: canvasWidth,
+              minHeight: canvasHeight,
+              height: canvasHeight,
+              transform: `scale(${zoom / 100})`,
+              transformOrigin: 'top center',
+            }}
+          >
+            {/* Canvas content */}
+            {renderCanvasContent()}
+          </div>
+        )}
+      </div>
+
+      {/* Zoom indicator */}
+      <div className="fixed bottom-6 left-6 bg-gray-900/90 backdrop-blur border border-gray-700 px-3 py-1.5 rounded-full text-gray-300 text-xs shadow-lg">
+        {zoom}%
+      </div>
+    </div>
+  );
+
+  // Render canvas content function
+  function renderCanvasContent() {
+    return (
+      <>
           {/* Viewport Width Guides */}
           <div className="absolute top-0 left-0 w-full h-8 border-b border-dashed border-gray-300 flex justify-between px-2 text-[10px] text-gray-400 select-none pointer-events-none z-50">
              <span>0px</span>
@@ -524,30 +806,79 @@ export default function EditorCanvas() {
              </span>
           </div>
 
-          {/* Render all components */}
-          {components.map((comp, index) => {
-             // Only render root components (items not in a group)
-             // Children are rendered recursively by their parent container
-             if (comp.parentId) return null;
-             return renderComponent(comp, index);
-          })}
-
-          {/* Empty state */}
-          {components.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center text-gray-400 select-none">
-              <div className="text-center">
-                  <p className="text-xl font-medium mb-2">Start Building</p>
-                  <p className="text-sm">Drag and drop elements from the left panel</p>
-              </div>
-            </div>
-          )}
+        {/* Viewport Width Guides */}
+        <div className="absolute top-0 left-0 w-full h-8 border-b border-dashed border-gray-300 flex justify-between px-2 text-[10px] text-gray-400 select-none pointer-events-none z-50">
+          <span>0px</span>
+          <span>{canvasWidth}px</span>
         </div>
-      </div>
+        
+        {/* Canvas Height Resize Handle (Bottom) */}
+        <div 
+          className="absolute -bottom-4 left-0 w-full h-6 flex items-center justify-center cursor-ns-resize group z-50 hover:bg-purple-500/10 transition-colors rounded-b-lg"
+          onMouseDown={startResizeCanvas}
+          title="Drag to resize canvas height"
+        >
+          <div className="w-16 h-1 bg-gray-300 rounded-full group-hover:bg-purple-500 transition-colors shadow-sm" />
+          <span className="absolute right-2 text-[10px] text-gray-400 group-hover:text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity">
+            {canvasHeight}px
+          </span>
+        </div>
 
-      {/* Zoom indicator */}
-      <div className="fixed bottom-6 left-6 bg-gray-900/90 backdrop-blur border border-gray-700 px-3 py-1.5 rounded-full text-gray-300 text-xs shadow-lg">
-        {zoom}%
-      </div>
-    </div>
-  );
+        {/* Render all components */}
+        {components.map((comp, index) => {
+          // Only render root components (items not in a group)
+          // Children are rendered recursively by their parent container
+          if (comp.parentId) return null;
+          
+          // Add overflow warning for this component
+          const isOverflowing = previewMode !== 'desktop' && 
+            (comp.styles.x + comp.styles.width) > canvasWidth;
+          
+          return (
+            <React.Fragment key={comp.id}>
+              {renderComponent(comp, index)}
+              {isOverflowing && (
+                <div
+                  className="absolute pointer-events-none z-[60]"
+                  style={{
+                    left: getScaledValue(comp.styles.x),
+                    top: comp.styles.y,
+                    width: getScaledValue(comp.styles.width),
+                    height: getScaledHeight(comp.styles.height),
+                  }}
+                >
+                  <div className="absolute -top-8 right-0 bg-red-500 text-white text-[10px] px-2 py-1 rounded-md shadow-lg flex items-center gap-2 pointer-events-auto">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    <span className="font-semibold">Overflow</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        fixSingleComponent(comp);
+                      }}
+                      className="ml-1 bg-white text-red-500 px-2 py-0.5 rounded text-[9px] font-bold hover:bg-red-50 transition-colors"
+                    >
+                      Fix
+                    </button>
+                  </div>
+                  <div className="absolute inset-0 border-2 border-red-500 border-dashed rounded-lg bg-red-500/5 animate-pulse" />
+                </div>
+              )}
+            </React.Fragment>
+          );
+        })}
+
+        {/* Empty state */}
+        {components.length === 0 && (
+          <div className="absolute inset-0 flex items-center justify-center text-gray-400 select-none">
+            <div className="text-center">
+              <p className="text-xl font-medium mb-2">Start Building</p>
+              <p className="text-sm">Drag and drop elements from the left panel</p>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
 }

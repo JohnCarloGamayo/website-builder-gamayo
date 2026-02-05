@@ -5,11 +5,20 @@ import { persist } from 'zustand/middleware';
 
 export interface ComponentData {
   id: string;
-  type: 'text' | 'image' | 'button' | 'container' | 'shape' | 'icon' | 'video' | 'input' | 'divider';
+  type: 'text' | 'image' | 'button' | 'container' | 'shape' | 'icon' | 'video' | 'input' | 'divider' | 
+        'heading' | 'paragraph' | 'link' | 'card' | 'badge' | 'tag' | 'audio' | 'embed' | 
+        'textarea' | 'checkbox' | 'radio' | 'select' | 'grid' | 'flex' | 'section' | 
+        'navbar' | 'menu' | 'breadcrumb' | 'list' | 'table' | 'accordion' | 'tabs' | 'modal' | 
+        'slider' | 'progress' | 'alert' | 'tooltip' | 'rating' | 'avatar' | 'quote';
   name: string;
   content?: string;
   src?: string;
   placeholder?: string;
+  href?: string;
+  alt?: string;
+  options?: string[]; // For select, radio, checkbox groups
+  checked?: boolean; // For checkbox, radio
+  value?: string | number; // For form elements
   styles: {
     x: number;
     y: number;

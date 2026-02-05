@@ -248,33 +248,48 @@ export default function EditorHeader() {
         <div className="h-6 w-px bg-gray-700" />
 
         {/* Responsive Preview Modes */}
-        <div className="flex items-center gap-1 bg-gray-800 rounded-lg">
+        <div className="flex items-center gap-1 bg-gray-800/80 backdrop-blur border border-gray-700/50 rounded-xl p-1 shadow-lg">
           <button
             onClick={() => handlePreviewMode('desktop')}
-            className={`p-2 rounded-lg transition-colors ${
-              previewMode === 'desktop' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'
+            className={`p-2.5 rounded-lg transition-all duration-200 relative group ${
+              previewMode === 'desktop' 
+                ? 'bg-gradient-to-br from-purple-600 to-purple-700 text-white shadow-lg shadow-purple-500/30 scale-105' 
+                : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
             }`}
             title="Desktop (1440px)"
           >
-            <Monitor size={16} />
+            <Monitor size={18} className={previewMode === 'desktop' ? 'animate-pulse' : ''} />
+            {previewMode === 'desktop' && (
+              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-4 h-0.5 bg-purple-400 rounded-full" />
+            )}
           </button>
           <button
             onClick={() => handlePreviewMode('tablet')}
-            className={`p-2 rounded-lg transition-colors ${
-              previewMode === 'tablet' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'
+            className={`p-2.5 rounded-lg transition-all duration-200 relative group ${
+              previewMode === 'tablet' 
+                ? 'bg-gradient-to-br from-purple-600 to-purple-700 text-white shadow-lg shadow-purple-500/30 scale-105' 
+                : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
             }`}
             title="Tablet (768px)"
           >
-            <Tablet size={16} />
+            <Tablet size={18} className={previewMode === 'tablet' ? 'animate-pulse' : ''} />
+            {previewMode === 'tablet' && (
+              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-4 h-0.5 bg-purple-400 rounded-full" />
+            )}
           </button>
           <button
             onClick={() => handlePreviewMode('mobile')}
-            className={`p-2 rounded-lg transition-colors ${
-              previewMode === 'mobile' ? 'bg-purple-600 text-white' : 'text-gray-400 hover:text-white'
+            className={`p-2.5 rounded-lg transition-all duration-200 relative group ${
+              previewMode === 'mobile' 
+                ? 'bg-gradient-to-br from-purple-600 to-purple-700 text-white shadow-lg shadow-purple-500/30 scale-105' 
+                : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
             }`}
             title="Mobile (375px)"
           >
-            <Smartphone size={16} />
+            <Smartphone size={18} className={previewMode === 'mobile' ? 'animate-pulse' : ''} />
+            {previewMode === 'mobile' && (
+              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-4 h-0.5 bg-purple-400 rounded-full" />
+            )}
           </button>
         </div>
       </div>
