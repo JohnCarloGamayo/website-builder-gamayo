@@ -5,7 +5,11 @@ import { SketchPicker } from 'react-color';
 import { useState, useRef } from 'react';
 import { 
   Type, Palette, Move, AlignLeft, AlignCenter, AlignRight, AlignJustify,
-  Bold, Italic, Underline, Image as ImageIcon, Lock, Eye, Box, File, Plus, Trash2, Globe, Sparkles
+  Bold, Italic, Underline, Image as ImageIcon, Lock, Eye, Box, File, Plus, Trash2, Globe, Sparkles,
+  Heart, Star, Circle, Square, Triangle, Hexagon, Zap, Mail, Phone, User, Users, Home as HomeIcon, Settings,
+  Search, ShoppingCart, Bookmark, Camera, Video, Music, MessageCircle, Bell, Calendar, Clock,
+  MapPin, Compass, TrendingUp, Award, Target, Shield, Check, X, AlertCircle, Info, HelpCircle,
+  Sun, Moon, Cloud, Droplets, Wind, Code, Terminal, Database, Layers, Package, Gift, Scissors
 } from 'lucide-react';
 
 // Reusable color picker component
@@ -70,6 +74,73 @@ export default function PropertiesPanel() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAddingPage, setIsAddingPage] = useState(false);
   const [newPageName, setNewPageName] = useState('');
+  const [showIconPicker, setShowIconPicker] = useState(false);
+
+  // Icon library
+  const iconLibrary = [
+    { name: 'Heart', icon: Heart },
+    { name: 'Star', icon: Star },
+    { name: 'Circle', icon: Circle },
+    { name: 'Square', icon: Square },
+    { name: 'Triangle', icon: Triangle },
+    { name: 'Hexagon', icon: Hexagon },
+    { name: 'Zap', icon: Zap },
+    { name: 'Mail', icon: Mail },
+    { name: 'Phone', icon: Phone },
+    { name: 'User', icon: User },
+    { name: 'Users', icon: Users },
+    { name: 'Home', icon: HomeIcon },
+    { name: 'Settings', icon: Settings },
+    { name: 'Search', icon: Search },
+    { name: 'ShoppingCart', icon: ShoppingCart },
+    { name: 'Bookmark', icon: Bookmark },
+    { name: 'Camera', icon: Camera },
+    { name: 'Video', icon: Video },
+    { name: 'Music', icon: Music },
+    { name: 'MessageCircle', icon: MessageCircle },
+    { name: 'Bell', icon: Bell },
+    { name: 'Calendar', icon: Calendar },
+    { name: 'Clock', icon: Clock },
+    { name: 'MapPin', icon: MapPin },
+    { name: 'Compass', icon: Compass },
+    { name: 'TrendingUp', icon: TrendingUp },
+    { name: 'Award', icon: Award },
+    { name: 'Target', icon: Target },
+    { name: 'Shield', icon: Shield },
+    { name: 'Check', icon: Check },
+    { name: 'X', icon: X },
+    { name: 'AlertCircle', icon: AlertCircle },
+    { name: 'Info', icon: Info },
+    { name: 'HelpCircle', icon: HelpCircle },
+    { name: 'Sun', icon: Sun },
+    { name: 'Moon', icon: Moon },
+    { name: 'Cloud', icon: Cloud },
+    { name: 'Droplets', icon: Droplets },
+    { name: 'Wind', icon: Wind },
+    { name: 'Code', icon: Code },
+    { name: 'Terminal', icon: Terminal },
+    { name: 'Database', icon: Database },
+    { name: 'Layers', icon: Layers },
+    { name: 'Package', icon: Package },
+    { name: 'Gift', icon: Gift },
+    { name: 'Scissors', icon: Scissors },
+  ];
+
+  // Masking presets
+  const maskPresets = [
+    { name: 'None', value: '' },
+    { name: 'Circle', value: 'circle(50% at 50% 50%)' },
+    { name: 'Rounded', value: 'inset(0 round 20px)' },
+    { name: 'Triangle', value: 'polygon(50% 0%, 0% 100%, 100% 100%)' },
+    { name: 'Diamond', value: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' },
+    { name: 'Pentagon', value: 'polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%)' },
+    { name: 'Hexagon', value: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)' },
+    { name: 'Star', value: 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)' },
+    { name: 'Parallelogram', value: 'polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%)' },
+    { name: 'Trapezoid', value: 'polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)' },
+    { name: 'Arrow Right', value: 'polygon(0% 20%, 60% 20%, 60% 0%, 100% 50%, 60% 100%, 60% 80%, 0% 80%)' },
+    { name: 'Wave', value: 'ellipse(100% 100% at 50% 0%)' },
+  ];
 
   const selected = components.find((c) => c.id === selectedId);
 
@@ -314,7 +385,60 @@ export default function PropertiesPanel() {
           </div>
         )}
 
-        {/* GROUP 2: LAYOUT & POSITION */}
+        {/* Icon Picker Section */}
+        {selected.type === 'icon' && (
+          <div className="p-4 border-b border-gray-800 space-y-3">
+            <label className="text-gray-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+              <Sparkles size={12} /> Icon Selection
+            </label>
+            
+            <button
+              onClick={() => setShowIconPicker(!showIconPicker)}
+              className="w-full bg-[#2a2a3e] border border-gray-700 rounded-lg p-3 hover:border-purple-500 transition-colors flex items-center justify-between"
+            >
+              <div className="flex items-center gap-3">
+                {selected.iconName && iconLibrary.find(i => i.name === selected.iconName) ? (
+                  (() => {
+                    const IconComponent = iconLibrary.find(i => i.name === selected.iconName)?.icon;
+                    return IconComponent ? <IconComponent size={24} className="text-purple-400" /> : <Circle size={24} className="text-gray-400" />;
+                  })()
+                ) : (
+                  <Circle size={24} className="text-gray-400" />
+                )}
+                <span className="text-white text-sm">
+                  {selected.iconName || 'Select Icon'}
+                </span>
+              </div>
+              <span className="text-gray-500 text-xs">{showIconPicker ? '▲' : '▼'}</span>
+            </button>
+
+            {showIconPicker && (
+              <div className="bg-[#2a2a3e] border border-gray-700 rounded-lg p-3 max-h-64 overflow-y-auto custom-scrollbar">
+                <div className="grid grid-cols-5 gap-2">
+                  {iconLibrary.map(({ name, icon: IconComponent }) => (
+                    <button
+                      key={name}
+                      onClick={() => {
+                        updateComponent(selectedId!, { iconName: name });
+                        setShowIconPicker(false);
+                      }}
+                      className={`p-3 rounded-lg hover:bg-purple-600/20 transition-all flex items-center justify-center border ${
+                        selected.iconName === name
+                          ? 'bg-purple-600 text-white border-purple-500'
+                          : 'bg-gray-800/50 text-gray-400 border-transparent hover:border-purple-500/50'
+                      }`}
+                      title={name}
+                    >
+                      <IconComponent size={20} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* LAYOUT & POSITION */}
         <div className="p-4 border-b border-gray-800 space-y-4">
           <label className="text-gray-400 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
             <Move size={12} /> Layout
@@ -440,6 +564,31 @@ export default function PropertiesPanel() {
              <div className="grid grid-cols-2 gap-3">
                  <NumberInput label="Radius" value={selected.styles.borderRadius || 0} onChange={(v) => updateComponentStyles(selectedId!, { borderRadius: v })} />
                  <NumberInput label="Padding" value={selected.styles.padding || 0} onChange={(v) => updateComponentStyles(selectedId!, { padding: v })} />
+             </div>
+
+             {/* Masking Section */}
+             <div className="space-y-2 pt-3 border-t border-gray-700/50">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400 text-xs font-semibold flex items-center gap-2">
+                    <Scissors size={12} /> Clipping Mask
+                  </span>
+                </div>
+                <select
+                  value={selected.styles.clipPath || ''}
+                  onChange={(e) => updateComponentStyles(selectedId!, { clipPath: e.target.value })}
+                  className="w-full bg-[#2a2a3e] border border-gray-700 rounded p-2 text-white text-xs focus:border-purple-500 focus:outline-none"
+                >
+                  {maskPresets.map((preset) => (
+                    <option key={preset.name} value={preset.value}>
+                      {preset.name}
+                    </option>
+                  ))}
+                </select>
+                {selected.styles.clipPath && (
+                  <div className="mt-2 p-2 bg-gray-800/50 rounded border border-gray-700/50">
+                    <p className="text-[10px] text-gray-500 font-mono break-all">{selected.styles.clipPath}</p>
+                  </div>
+                )}
              </div>
           </div>
         </div>

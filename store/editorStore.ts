@@ -9,7 +9,11 @@ export interface ComponentData {
         'heading' | 'paragraph' | 'link' | 'card' | 'badge' | 'tag' | 'audio' | 'embed' | 
         'textarea' | 'checkbox' | 'radio' | 'select' | 'grid' | 'flex' | 'section' | 
         'navbar' | 'menu' | 'breadcrumb' | 'list' | 'table' | 'accordion' | 'tabs' | 'modal' | 
-        'slider' | 'progress' | 'alert' | 'tooltip' | 'rating' | 'avatar' | 'quote';
+        'slider' | 'progress' | 'alert' | 'tooltip' | 'rating' | 'avatar' | 'quote' |
+        'spinner' | 'skeleton' | 'stepper' | 'pagination' | 'dropdown' | 'drawer' | 'popover' |
+        'switch' | 'chip' | 'timeline' | 'stats' | 'metric' | 'testimonial' | 'pricing-card' |
+        'feature-card' | 'cta-button' | 'footer' | 'sidebar' | 'column' | 'row' | 'spacer' |
+        'gradient-box' | 'glow-card' | 'image-gallery' | 'carousel' | 'banner' | 'announcement';
   name: string;
   content?: string;
   src?: string;
@@ -19,6 +23,8 @@ export interface ComponentData {
   options?: string[]; // For select, radio, checkbox groups
   checked?: boolean; // For checkbox, radio
   value?: string | number; // For form elements
+  iconName?: string; // For icon component - stores Lucide icon name
+  clipPath?: string; // For masking/clipping effect
   styles: {
     x: number;
     y: number;
@@ -44,6 +50,7 @@ export interface ComponentData {
     letterSpacing?: number;
     boxShadow?: string;
     rotation?: number;
+    clipPath?: string; // CSS clip-path for masking
   };
   animation?: {
     type: string; // e.g., 'fade-in-up', 'zoom-in', 'slide-in-left'

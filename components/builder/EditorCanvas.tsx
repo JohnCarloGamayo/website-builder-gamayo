@@ -4,6 +4,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useEditorStore, ComponentData } from '@/store/editorStore';
 import { Rnd } from 'react-rnd';
 import ContextMenu from './ContextMenu';
+import * as LucideIcons from 'lucide-react';
 
 export default function EditorCanvas() {
   const { 
@@ -235,7 +236,8 @@ export default function EditorCanvas() {
       cursor: comp.locked ? 'not-allowed' : 'move',
       userSelect: 'none',
       transform: `rotate(${comp.styles.rotation || 0}deg)`,
-      pointerEvents: 'auto'
+      pointerEvents: 'auto',
+      clipPath: comp.styles.clipPath || undefined,
     };
     
     // Flex Styles for content alignment
@@ -256,6 +258,24 @@ export default function EditorCanvas() {
     switch (comp.type) {
         case 'image':
             content = comp.src ? <img src={comp.src} alt={comp.name} className="w-full h-full object-cover select-none pointer-events-none" draggable={false} /> : <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">Image</div>;
+            break;
+        case 'icon':
+            (() => {
+              const IconComponent = comp.iconName && (LucideIcons as any)[comp.iconName];
+              if (IconComponent) {
+                content = (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <IconComponent 
+                      size={Math.min(comp.styles.width, comp.styles.height) * 0.6} 
+                      strokeWidth={2}
+                      style={{ color: comp.styles.textColor || comp.styles.backgroundColor || '#6366f1' }}
+                    />
+                  </div>
+                );
+              } else {
+                content = <div className="w-full h-full flex items-center justify-center text-4xl">🔷</div>;
+              }
+            })();
             break;
         case 'video':
             content = <div className="w-full h-full bg-black flex items-center justify-center text-white"><span className="text-3xl">▶</span></div>;
@@ -466,7 +486,8 @@ export default function EditorCanvas() {
         borderColor: comp.styles.borderColor || 'transparent',
         boxShadow: comp.styles.boxShadow,
         overflow: 'hidden',
-        pointerEvents: 'none' // Static inside group
+        pointerEvents: 'none', // Static inside group
+        clipPath: comp.styles.clipPath || undefined,
       };
       
       const wrapperStyle: React.CSSProperties = {
@@ -492,7 +513,23 @@ export default function EditorCanvas() {
           return <div style={style} dangerouslySetInnerHTML={{ __html: comp.content || '' }} />;
         
         case 'icon':
-          return <div style={style}><div style={wrapperStyle}>🔷</div></div>;
+          (() => {
+            const IconComponent = comp.iconName && (LucideIcons as any)[comp.iconName];
+            if (IconComponent) {
+              return (
+                <div style={style}>
+                  <div style={{...wrapperStyle, alignItems: 'center', justifyContent: 'center'}}>
+                    <IconComponent 
+                      size={Math.min(comp.styles.width, comp.styles.height) * 0.6} 
+                      strokeWidth={2}
+                      style={{ color: comp.styles.textColor || comp.styles.backgroundColor || '#6366f1' }}
+                    />
+                  </div>
+                </div>
+              );
+            }
+          })();
+          return <div style={style}><div style={{...wrapperStyle, alignItems: 'center', justifyContent: 'center'}}>🔷</div></div>;
         
         case 'text':
         case 'button':
@@ -587,6 +624,77 @@ export default function EditorCanvas() {
         
         case 'shape':
           return <div style={style}></div>;
+        
+        // New Components
+        case 'spacer':
+          return <div style={{...style, backgroundColor: 'transparent'}} title="Spacer"></div>;
+        
+        case 'row':
+        case 'column':
+          return <div style={{...style, display: 'flex', flexDirection: comp.type === 'row' ? 'row' : 'column', gap: '10px', alignItems: 'flex-start'}}><div style={{flex: 1, background: '#f0f0f0', borderRadius: 4, padding: 8, minHeight: 40}}>Item 1</div><div style={{flex: 1, background: '#f0f0f0', borderRadius: 4, padding: 8, minHeight: 40}}>Item 2</div></div>;
+        
+        case 'sidebar':
+          return <div style={{...style, background: comp.styles.backgroundColor || '#1f2937', color: comp.styles.textColor || '#ffffff', padding: comp.styles.padding || 16}}><div style={{fontSize: 18, fontWeight: 'bold', marginBottom: 16}}>Sidebar</div><div style={{display: 'flex', flexDirection: 'column', gap: 8}}><div style={{padding: 8, background: 'rgba(255,255,255,0.1)', borderRadius: 4}}>Menu Item 1</div><div style={{padding: 8, background: 'rgba(255,255,255,0.1)', borderRadius: 4}}>Menu Item 2</div></div></div>;
+        
+        case 'switch':
+          return <div style={{...style, position: 'relative', cursor: 'pointer', backgroundColor: comp.checked ? '#3b82f6' : '#d1d5db', transition: 'background 0.2s'}}><div style={{position: 'absolute', top: '2px', left: comp.checked ? 'calc(100% - 22px)' : '2px', width: '20px', height: '20px', background: '#ffffff', borderRadius: '50%', transition: 'left 0.2s'}}></div></div>;
+        
+        case 'chip':
+          return <span style={{...style, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '4px', whiteSpace: 'nowrap', cursor: 'pointer'}}>{comp.content || 'Chip'} <span style={{fontSize: '0.8em', opacity: 0.7}}>\u00d7</span></span>;
+        
+        case 'spinner':
+          return <div style={{...style, border: `${comp.styles.borderWidth || 4}px solid ${comp.styles.borderColor || '#3b82f6'}`, borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite'}} />;
+        
+        case 'skeleton':
+          return <div style={{...style, backgroundColor: comp.styles.backgroundColor || '#e5e7eb', borderRadius: comp.styles.borderRadius || 4, background: 'linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite'}} />;
+        
+        case 'pagination':
+          return <div style={{...style, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}}><button style={{padding: '8px 12px', border: '1px solid #e5e7eb', borderRadius: '4px', background: '#fff', cursor: 'pointer'}}>\u2190</button><button style={{padding: '8px 12px', border: '1px solid #3b82f6', borderRadius: '4px', background: '#3b82f6', color: '#fff', cursor: 'pointer'}}>1</button><button style={{padding: '8px 12px', border: '1px solid #e5e7eb', borderRadius: '4px', background: '#fff', cursor: 'pointer'}}>2</button><button style={{padding: '8px 12px', border: '1px solid #e5e7eb', borderRadius: '4px', background: '#fff', cursor: 'pointer'}}>\u2192</button></div>;
+        
+        case 'stepper':
+          return <div style={{...style, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: comp.styles.padding || 16}}>{comp.content || 'Step 1 \u2192 Step 2 \u2192 Step 3'}</div>;
+        
+        case 'footer':
+          return <div style={{...style, display: 'flex', flexDirection: 'column', gap: '16px', padding: comp.styles.padding || 20, backgroundColor: comp.styles.backgroundColor || '#1f2937', color: comp.styles.textColor || '#ffffff'}}><div style={{display: 'flex', justifyContent: 'space-between'}}><div><div style={{fontWeight: 'bold', marginBottom: '8px'}}>Company</div><div style={{fontSize: '0.9em', opacity: 0.8}}>About \u2022 Contact \u2022 Careers</div></div><div><div style={{fontWeight: 'bold', marginBottom: '8px'}}>Resources</div><div style={{fontSize: '0.9em', opacity: 0.8}}>Blog \u2022 Docs \u2022 Support</div></div></div><div style={{borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px', fontSize: '0.85em', opacity: 0.7, textAlign: 'center'}}>\u00a9 2024 Company Name. All rights reserved.</div></div>;
+        
+        case 'timeline':
+          return <div style={{...style, display: 'flex', flexDirection: 'column', gap: '16px', padding: comp.styles.padding || 16}}><div style={{display: 'flex', gap: '12px'}}><div style={{width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#3b82f6', marginTop: '4px'}}></div><div><div style={{fontWeight: 'bold'}}>{comp.content || '2024 - Event'}</div><div style={{fontSize: '0.9em', opacity: 0.7, marginTop: '4px'}}>Description of the event</div></div></div></div>;
+        
+        case 'stats':
+          return <div style={{...style, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px'}}><div style={{fontSize: '2em', fontWeight: 'bold', color: '#3b82f6'}}>{comp.content || '1.2K'}</div><div style={{fontSize: '0.85em', opacity: 0.7, textAlign: 'center'}}>Total Users</div></div>;
+        
+        case 'metric':
+          return <div style={{...style, display: 'flex', alignItems: 'center', gap: '8px', fontSize: comp.styles.fontSize || 32, fontWeight: comp.styles.fontWeight || 'bold', color: comp.styles.textColor || '#10b981'}}><span>\u2191</span>{comp.content || '+24%'}</div>;
+        
+        case 'pricing-card':
+          return <div style={{...style, display: 'flex', flexDirection: 'column', gap: '16px', padding: comp.styles.padding || 24}}><div style={{fontSize: '1.2em', fontWeight: 'bold'}}>Pro Plan</div><div style={{fontSize: '2.5em', fontWeight: 'bold'}}>{comp.content || '$99'}<span style={{fontSize: '0.4em', fontWeight: 'normal', opacity: 0.7}}>/month</span></div><ul style={{listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px'}}><li>\u2713 Feature 1</li><li>\u2713 Feature 2</li><li>\u2713 Feature 3</li></ul><button style={{padding: '12px', backgroundColor: '#3b82f6', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold'}}>Get Started</button></div>;
+        
+        case 'feature-card':
+          return <div style={{...style, padding: comp.styles.padding || 20, display: 'flex', flexDirection: 'column', gap: '12px'}}><div style={{width: '48px', height: '48px', borderRadius: '8px', backgroundColor: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '24px'}}>\u2728</div><div style={{fontSize: '1.2em', fontWeight: 'bold'}}>{comp.content || 'Feature Title'}</div><div style={{fontSize: '0.9em', opacity: 0.7}}>Description of this amazing feature that helps users achieve their goals.</div></div>;
+        
+        case 'testimonial':
+          return <div style={{...style, padding: comp.styles.padding || 20, display: 'flex', flexDirection: 'column', gap: '16px'}}><div style={{fontSize: '1.1em', fontStyle: 'italic'}}>{comp.content || '\"Amazing product!\"'}</div><div style={{display: 'flex', alignItems: 'center', gap: '12px'}}><div style={{width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#d1d5db'}}></div><div><div style={{fontWeight: 'bold'}}>John Doe</div><div style={{fontSize: '0.85em', opacity: 0.7}}>CEO, Company</div></div></div></div>;
+        
+        case 'cta-button':
+          return <button style={{...style, backgroundColor: comp.styles.backgroundColor || '#6366f1', color: comp.styles.textColor || '#ffffff', border: 'none', borderRadius: comp.styles.borderRadius || 8, fontSize: comp.styles.fontSize || 18, fontWeight: comp.styles.fontWeight || 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'transform 0.2s', padding: comp.styles.padding || 16}}>{comp.content || 'Get Started'}</button>;
+        
+        case 'gradient-box':
+          return <div style={{...style, background: `linear-gradient(135deg, ${comp.styles.backgroundColor || '#a855f7'} 0%, ${comp.styles.textColor || '#6366f1'} 100%)`}}></div>;
+        
+        case 'glow-card':
+          return <div style={{...style, position: 'relative', overflow: 'visible'}}><div style={{position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #6366f1, #a855f7)', opacity: 0.5, filter: 'blur(20px)', borderRadius: comp.styles.borderRadius || 12}}></div><div style={{position: 'relative', width: '100%', height: '100%', backgroundColor: comp.styles.backgroundColor || '#1e293b', borderRadius: comp.styles.borderRadius || 12, border: '1px solid rgba(99,102,241,0.3)'}}></div></div>;
+        
+        case 'image-gallery':
+          return <div style={{...style, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', padding: '16px'}}>{[1,2,3,4,5,6].map(i => <div key={i} style={{aspectRatio: '1', background: '#d1d5db', borderRadius: '4px'}}></div>)}</div>;
+        
+        case 'carousel':
+          return <div style={{...style, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center'}}><div style={{position: 'absolute', left: '16px', width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'}}>\u2190</div><div style={{backgroundColor: '#6366f1', width: '80%', height: '80%', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '1.5em'}}>Slide 1</div><div style={{position: 'absolute', right: '16px', width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'}}>\u2192</div></div>;
+        
+        case 'banner':
+          return <div style={{...style, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: comp.styles.fontWeight || 'bold', fontSize: comp.styles.fontSize || 24}}>{comp.content || 'Special Offer!'}</div>;
+        
+        case 'announcement':
+          return <div style={{...style, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: comp.styles.padding || 12}}><div style={{display: 'flex', alignItems: 'center', gap: '12px'}}><span>\ud83d\udce2</span><span>{comp.content || 'New Update Available'}</span></div><button style={{background: 'rgba(255,255,255,0.2)', border: 'none', padding: '6px 12px', borderRadius: '4px', color: 'inherit', cursor: 'pointer', fontWeight: 'bold'}}>Learn More</button></div>;
         
         default:
           return <div style={style}>{comp.content || comp.type}</div>;
